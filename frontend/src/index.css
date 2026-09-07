@@ -43,14 +43,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 html,
 body,
 #root {
@@ -93,36 +85,3 @@ body {
     animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
-
-.ripple {
-  position: relative;
-  overflow: hidden;
-}
-.ripple::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 10%, transparent 10%);
-  background-size: 0;
-  background-position: 50%;
-  background-repeat: no-repeat;
-  transition: background-size 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.ripple:active::after {
-  background-size: 1000%;
-  transition: background-size 0s;
-}
-
-/* Align Bootstrap color utilities with the clinical theme palette */
-.bg-primary { background-color: var(--color-primary) !important; }
-.text-primary { color: var(--color-primary) !important; }
-.border-primary { border-color: var(--color-primary) !important; }
-.bg-danger { background-color: var(--color-danger) !important; }
-.text-danger { color: var(--color-danger) !important; }
-.bg-success { background-color: var(--color-success) !important; }
-.text-success { color: var(--color-success) !important; }
-.bg-warning { background-color: var(--color-warning) !important; }
-.text-warning { color: var(--color-warning) !important; }
-.bg-info { background-color: #3b82f6 !important; }
-.text-info { color: #3b82f6 !important; }

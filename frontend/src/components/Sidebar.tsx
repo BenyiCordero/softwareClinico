@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from 'react'
+import { ChevronRight, HeartPulse } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { sidebarConfig, type SidebarItem } from '@/config/sidebar'
 
@@ -36,7 +37,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       <aside id="sidebar" className={open ? 'sidebar-open' : ''}>
         <div className="sidebar-header">
           <div className="sidebar-brand-icon">
-            <i className="fas fa-heartbeat" />
+            <HeartPulse className="h-7 w-7" />
           </div>
           <div className="sidebar-brand-text">
             <div className="sidebar-title">Quirurgia</div>
@@ -46,8 +47,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
         <nav className="sidebar-nav" id="sidebar-nav">
           <ul className="sidebar-menu">
-            {sidebarConfig.map((item) =>
-              item.items && item.items.length ? (
+            {sidebarConfig.map((item) => {
+              const ItemIcon = item.icon
+              return item.items && item.items.length ? (
                 <li key={item.id}>
                   <a
                     href="#"
@@ -57,23 +59,26 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                       toggle(item.id)
                     }}
                   >
-                    <i className="fas fa-chevron-right sidebar-item-arrow" />
-                    <i className={`fas ${item.fa} sidebar-item-icon`} />
+                    <ChevronRight className="sidebar-item-arrow" />
+                    <ItemIcon className="sidebar-item-icon h-4 w-4" />
                     <span>{item.label}</span>
                   </a>
                   <ul className={`sidebar-submenu ${isOpen(item) ? 'open' : ''}`}>
-                    {item.items.map((sub) => (
-                      <li key={sub.path}>
-                        <a
-                          href="#"
-                          className={`sidebar-item sidebar-sub-item ${sub.path === pathname ? 'active' : ''}`}
-                          onClick={go(sub)}
-                        >
-                          <i className={`fas ${sub.fa} sidebar-item-icon`} />
-                          <span>{sub.label}</span>
-                        </a>
-                      </li>
-                    ))}
+                    {item.items.map((sub) => {
+                      const SubIcon = sub.icon
+                      return (
+                        <li key={sub.path}>
+                          <a
+                            href="#"
+                            className={`sidebar-item sidebar-sub-item ${sub.path === pathname ? 'active' : ''}`}
+                            onClick={go(sub)}
+                          >
+                            <SubIcon className="sidebar-item-icon h-4 w-4" />
+                            <span>{sub.label}</span>
+                          </a>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </li>
               ) : (
@@ -83,17 +88,17 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     className={`sidebar-item ${item.path === pathname ? 'active' : ''}`}
                     onClick={go(item)}
                   >
-                    <i className={`fas ${item.fa} sidebar-item-icon`} />
+                    <ItemIcon className="sidebar-item-icon h-4 w-4" />
                     <span>{item.label}</span>
                   </a>
                 </li>
-              ),
-            )}
+              )
+            })}
           </ul>
         </nav>
 
         <div className="sidebar-footer">
-          <small className="text-muted">v1.0.0</small>
+          <small className="text-ink-muted">v1.0.0</small>
         </div>
       </aside>
 

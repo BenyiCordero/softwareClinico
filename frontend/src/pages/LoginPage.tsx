@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react'
+import { Eye, EyeOff, HeartPulse, Lock, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Button, Field, Input } from '@/components/ui'
 import { useAuthStore } from '@/stores/authStore'
 
 export default function LoginPage() {
@@ -31,7 +33,7 @@ export default function LoginPage() {
       <div id="login-left">
         <div className="login-left-content">
           <div className="login-brand-icon">
-            <i className="fas fa-heartbeat" />
+            <HeartPulse className="h-20 w-20" />
           </div>
           <h1 className="login-brand-name">QUIRURGIA</h1>
           <p className="login-brand-desc">Sistema Clínico</p>
@@ -42,75 +44,68 @@ export default function LoginPage() {
         <div className="login-card">
           <div className="text-center mb-4">
             <div className="login-form-icon">
-              <i className="fas fa-heartbeat" />
+              <HeartPulse className="h-8 w-8" />
             </div>
             <h4 className="login-form-title">Iniciar Sesión</h4>
             <p className="login-form-sub">Ingresa tus credenciales para acceder</p>
           </div>
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-3">
-              <label htmlFor="username" className="form-label fw-medium">
-                Usuario
-              </label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-user" />
-                </span>
-                <input
+              <Field label="Usuario" htmlFor="username">
+                <Input
                   type="text"
-                  className="form-control"
                   id="username"
                   placeholder="Tu usuario"
                   required
                   autoComplete="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  leading={<User className="h-4 w-4" />}
                 />
-              </div>
+              </Field>
             </div>
             <div className="mb-4">
-              <label htmlFor="password" className="form-label fw-medium">
-                Contraseña
-              </label>
-              <div className="input-group">
-                <span className="input-group-text">
-                  <i className="fas fa-lock" />
-                </span>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  className="form-control"
-                  id="password"
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  className="btn btn-outline-secondary px-3"
-                  type="button"
-                  id="toggle-password"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label="Mostrar contraseña"
-                >
-                  <i className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'} id="toggle-password-icon" />
-                </button>
-              </div>
+              <Field label="Contraseña" htmlFor="password">
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    placeholder="••••••••"
+                    required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    leading={<Lock className="h-4 w-4" />}
+                    className="pr-11"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="button"
+                    id="toggle-password"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </Field>
             </div>
-            <button type="submit" className="btn btn-primary w-100 btn-login ripple" id="btn-login" disabled={loading}>
-              <span id="btn-login-text" className={loading ? 'd-none' : ''}>
-                Iniciar Sesión
-              </span>
-              <span id="btn-login-loader" className={loading ? '' : 'd-none'}>
-                <span className="spinner-border spinner-border-sm me-2" role="status" />
-                Ingresando...
-              </span>
-            </button>
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              loading={loading}
+              className="btn-login"
+              id="btn-login"
+            >
+              {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+            </Button>
           </form>
         </div>
         <div className="login-footer">
-          <small className="text-muted">&copy; 2026 Quirurgia — Todos los derechos reservados</small>
+          <small className="text-ink-muted">&copy; 2026 Quirurgia — Todos los derechos reservados</small>
         </div>
       </div>
     </div>
