@@ -1,7 +1,7 @@
 import { SlidersHorizontal } from 'lucide-react'
 import PagePlaceholder from '@/components/PagePlaceholder'
 
-export default function ConfiguracionPage() {
+export default function SettingsPage() {
   return (
     <PagePlaceholder
       title="Configuración"

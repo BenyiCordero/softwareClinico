@@ -1,12 +1,12 @@
 import { PillBottle } from 'lucide-react'
 import PagePlaceholder from '@/components/PagePlaceholder'
 
-export default function CatalogoMedicamentosPage() {
+export default function PharmacyMovementsPage() {
   return (
     <PagePlaceholder
-      title="Catálogo de Medicamentos"
+      title="Movimientos de Farmacia"
       icon={PillBottle}
-      description="Inventario de medicamentos de la farmacia"
+      description="Entradas y salidas de medicamentos"
     />
   )
 }
