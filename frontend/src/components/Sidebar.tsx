@@ -11,17 +11,24 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [userExpanded, setUserExpanded] = useState<string[]>([])
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  const [openOverride, setOpenOverride] = useState<Record<string, boolean>>({})
 
+  // On navigation, drop manual overrides so auto-open applies again.
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname)
+    setOpenOverride({})
+  }
+
+  // Manual toggle wins; otherwise the section holding the current route opens.
   const isAutoOpen = (item: SidebarItem): boolean =>
     !!item.items?.some((sub) => sub.path === pathname)
 
-  const isOpen = (item: SidebarItem) => isAutoOpen(item) || userExpanded.includes(item.id)
+  const isOpen = (item: SidebarItem) => openOverride[item.id] ?? isAutoOpen(item)
 
-  const toggle = (id: string) => {
-    setUserExpanded((prev) =>
-      prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id],
-    )
+  const toggle = (item: SidebarItem) => {
+    const next = !(openOverride[item.id] ?? isAutoOpen(item))
+    setOpenOverride((prev) => ({ ...prev, [item.id]: next }))
   }
 
   const go = (item: SidebarItem) => (e: MouseEvent) => {
@@ -56,8 +63,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     className={`sidebar-item sidebar-sub-toggle ${isOpen(item) ? 'open' : ''}`}
                     onClick={(e) => {
                       e.preventDefault()
-                      toggle(item.id)
+                      toggle(item)
                     }}
+                    aria-expanded={isOpen(item)}
                   >
                     <ChevronRight className="sidebar-item-arrow" />
                     <ItemIcon className="sidebar-item-icon h-4 w-4" />
