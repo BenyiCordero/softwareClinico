@@ -1,7 +1,7 @@
 import { ClipboardList } from 'lucide-react'
 import PagePlaceholder from '@/components/PagePlaceholder'
 
-export default function ExpedientesPage() {
+export default function MedicalRecordsPage() {
   return (
     <PagePlaceholder
       title="Expedientes"

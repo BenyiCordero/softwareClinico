@@ -1,4 +1,6 @@
+import { HeartPulse, LogOut, Menu, RotateCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Avatar, Button } from '@/components/ui'
 import { useAuthStore } from '@/stores/authStore'
 
 interface TopBarProps {
@@ -7,7 +9,7 @@ interface TopBarProps {
 
 export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate()
-  const nombre = useAuthStore((s) => s.nombre)
+  const displayName = useAuthStore((s) => s.displayName)
   const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = () => {
@@ -15,40 +17,53 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
     navigate('/login', { replace: true })
   }
 
-  const initial = (nombre ?? 'U').charAt(0).toUpperCase()
-
   return (
     <header id="topbar">
       <div className="topbar-left">
-        <button
-          className="btn btn-link topbar-toggle d-lg-none"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
           id="sidebarToggle"
           type="button"
           onClick={onToggleSidebar}
           aria-label="Abrir menú"
         >
-          <i className="fas fa-bars" />
-        </button>
+          <Menu className="h-5 w-5" />
+        </Button>
         <div className="topbar-brand-icon">
-          <i className="fas fa-heartbeat icon-brand" />
+          <HeartPulse className="icon-brand h-6 w-6" />
         </div>
         <span className="topbar-brand">Quirurgia</span>
       </div>
 
       <div className="topbar-right">
-        <button className="btn btn-topbar-icon" id="btn-reload" type="button" title="Recargar módulo actual">
-          <i className="fas fa-sync-alt" />
-        </button>
+        <Button
+          variant="outline"
+          size="icon"
+          id="btn-reload"
+          type="button"
+          title="Recargar módulo actual"
+        >
+          <RotateCw className="h-4 w-4" />
+        </Button>
         <div className="topbar-user-info">
           <span className="topbar-greeting">Bienvenido,</span>
-          <span className="topbar-user fw-semibold" id="display-name">
-            {nombre ?? 'Usuario'}
+          <span className="topbar-user font-semibold" id="display-name">
+            {displayName ?? 'Usuario'}
           </span>
         </div>
-        <div className="topbar-avatar">{initial}</div>
-        <button className="btn btn-topbar-logout" id="btn-logout" type="button" title="Cerrar sesión" onClick={handleLogout}>
-          <i className="fas fa-sign-out-alt" />
-        </button>
+        <Avatar name={displayName ?? 'Usuario'} />
+        <Button
+          variant="outline"
+          size="icon"
+          id="btn-logout"
+          type="button"
+          title="Cerrar sesión"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
       </div>
     </header>
   )

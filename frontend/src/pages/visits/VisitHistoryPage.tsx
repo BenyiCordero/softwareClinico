@@ -1,7 +1,7 @@
 import { BookOpen } from 'lucide-react'
 import PagePlaceholder from '@/components/PagePlaceholder'
 
-export default function HistorialConsultasPage() {
+export default function VisitHistoryPage() {
   return (
     <PagePlaceholder
       title="Historial de Consultas"

@@ -1,35 +1,58 @@
+import {
+  ArrowLeftRight,
+  BriefcaseMedical,
+  CalendarCheck,
+  ChartLine,
+  ClipboardCheck,
+  Cross,
+  FolderOpen,
+  History,
+  LayoutDashboard,
+  Microscope,
+  Pill,
+  Receipt,
+  Settings,
+  Stethoscope,
+  Syringe,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
+
 export interface SidebarItem {
+  id: string
   label: string
   path?: string
-  fa: string
+  icon: LucideIcon
   items?: SidebarItem[]
 }
 
 export const sidebarConfig: SidebarItem[] = [
-  { label: 'Panel Principal', path: '/dashboard', fa: 'fa-tachometer-alt' },
-  { label: 'Citas', path: '/dashboard/citas', fa: 'fa-calendar-check' },
-  { label: 'Expedientes', path: '/dashboard/expedientes', fa: 'fa-folder-open' },
-  { label: 'Pacientes', path: '/dashboard/pacientes', fa: 'fa-user-injured' },
-  { label: 'Médicos', path: '/dashboard/medicos', fa: 'fa-user-md' },
+  { id: 'dashboard', label: 'Panel Principal', path: '/dashboard', icon: LayoutDashboard },
+  { id: 'appointments', label: 'Citas', path: '/dashboard/appointments', icon: CalendarCheck },
+  { id: 'medical-records', label: 'Expedientes', path: '/dashboard/records', icon: FolderOpen },
+  { id: 'patients', label: 'Pacientes', path: '/dashboard/patients', icon: Users },
+  { id: 'doctors', label: 'Médicos', path: '/dashboard/doctors', icon: BriefcaseMedical },
   {
+    id: 'visits',
     label: 'Consultas',
-    fa: 'fa-stethoscope',
+    icon: Stethoscope,
     items: [
-      { label: 'Nueva Consulta', path: '/dashboard/consultas/nueva', fa: 'fa-clipboard-check' },
-      { label: 'Historial', path: '/dashboard/consultas/historial', fa: 'fa-history' },
+      { id: 'new-visit', label: 'Nueva Consulta', path: '/dashboard/visits/new', icon: ClipboardCheck },
+      { id: 'visit-history', label: 'Historial', path: '/dashboard/visits/history', icon: History },
     ],
   },
-  { label: 'Recetas', path: '/dashboard/recetas', fa: 'fa-prescription-bottle' },
-  { label: 'Laboratorio', path: '/dashboard/laboratorio', fa: 'fa-flask' },
+  { id: 'prescriptions', label: 'Recetas', path: '/dashboard/prescriptions', icon: Syringe },
+  { id: 'lab', label: 'Laboratorio', path: '/dashboard/lab', icon: Microscope },
   {
+    id: 'pharmacy',
     label: 'Farmacia',
-    fa: 'fa-pills',
+    icon: Cross,
     items: [
-      { label: 'Catálogo de Medicamentos', path: '/dashboard/farmacia/catalogo', fa: 'fa-capsules' },
-      { label: 'Movimientos', path: '/dashboard/farmacia/movimientos', fa: 'fa-exchange-alt' },
+      { id: 'medication-catalog', label: 'Catálogo de Medicamentos', path: '/dashboard/pharmacy/catalog', icon: Pill },
+      { id: 'pharmacy-movements', label: 'Movimientos', path: '/dashboard/pharmacy/movements', icon: ArrowLeftRight },
     ],
   },
-  { label: 'Facturación', path: '/dashboard/facturacion', fa: 'fa-file-invoice-dollar' },
-  { label: 'Actividad', path: '/dashboard/actividad', fa: 'fa-chart-line' },
-  { label: 'Configuración', path: '/dashboard/configuracion', fa: 'fa-cog' },
+  { id: 'billing', label: 'Facturación', path: '/dashboard/billing', icon: Receipt },
+  { id: 'activity', label: 'Actividad', path: '/dashboard/activity', icon: ChartLine },
+  { id: 'settings', label: 'Configuración', path: '/dashboard/settings', icon: Settings },
 ]

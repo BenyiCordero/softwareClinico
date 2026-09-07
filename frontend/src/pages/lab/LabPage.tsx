@@ -1,7 +1,7 @@
 import { Microscope } from 'lucide-react'
 import PagePlaceholder from '@/components/PagePlaceholder'
 
-export default function LaboratorioPage() {
+export default function LabPage() {
   return (
     <PagePlaceholder
       title="Laboratorio"

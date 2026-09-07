@@ -1,7 +1,7 @@
 import { Stethoscope } from 'lucide-react'
 import PagePlaceholder from '@/components/PagePlaceholder'
 
-export default function NuevaConsultaPage() {
+export default function NewVisitPage() {
   return (
     <PagePlaceholder
       title="Nueva Consulta"
