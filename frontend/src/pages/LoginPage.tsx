@@ -6,7 +6,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const login = useAuthStore((s) => s.login)
 
-  const [usuario, setUsuario] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -14,13 +14,13 @@ export default function LoginPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // Mock de autenticación: en una siguiente etapa se conectará al backend.
+    // Mock auth: will be connected to the backend in a later stage.
     setTimeout(() => {
       login({
         token: 'mock-token',
-        usuario,
-        nombre: usuario || 'Administrador',
-        rol: 'ADMINISTRADOR',
+        username,
+        displayName: username || 'Administrador',
+        role: 'ADMINISTRADOR',
       })
       navigate('/dashboard', { replace: true })
     }, 600)
@@ -63,8 +63,8 @@ export default function LoginPage() {
                   placeholder="Tu usuario"
                   required
                   autoComplete="username"
-                  value={usuario}
-                  onChange={(e) => setUsuario(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
             </div>

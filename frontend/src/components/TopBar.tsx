@@ -7,7 +7,7 @@ interface TopBarProps {
 
 export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate()
-  const nombre = useAuthStore((s) => s.nombre)
+  const displayName = useAuthStore((s) => s.displayName)
   const logout = useAuthStore((s) => s.logout)
 
   const handleLogout = () => {
@@ -15,7 +15,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
     navigate('/login', { replace: true })
   }
 
-  const initial = (nombre ?? 'U').charAt(0).toUpperCase()
+  const initial = (displayName ?? 'U').charAt(0).toUpperCase()
 
   return (
     <header id="topbar">
@@ -42,7 +42,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
         <div className="topbar-user-info">
           <span className="topbar-greeting">Bienvenido,</span>
           <span className="topbar-user fw-semibold" id="display-name">
-            {nombre ?? 'Usuario'}
+            {displayName ?? 'Usuario'}
           </span>
         </div>
         <div className="topbar-avatar">{initial}</div>

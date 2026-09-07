@@ -15,11 +15,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const isAutoOpen = (item: SidebarItem): boolean =>
     !!item.items?.some((sub) => sub.path === pathname)
 
-  const isOpen = (item: SidebarItem) => isAutoOpen(item) || userExpanded.includes(item.label)
+  const isOpen = (item: SidebarItem) => isAutoOpen(item) || userExpanded.includes(item.id)
 
-  const toggle = (label: string) => {
+  const toggle = (id: string) => {
     setUserExpanded((prev) =>
-      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+      prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id],
     )
   }
 
@@ -48,13 +48,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <ul className="sidebar-menu">
             {sidebarConfig.map((item) =>
               item.items && item.items.length ? (
-                <li key={item.label}>
+                <li key={item.id}>
                   <a
                     href="#"
                     className={`sidebar-item sidebar-sub-toggle ${isOpen(item) ? 'open' : ''}`}
                     onClick={(e) => {
                       e.preventDefault()
-                      toggle(item.label)
+                      toggle(item.id)
                     }}
                   >
                     <i className="fas fa-chevron-right sidebar-item-arrow" />
