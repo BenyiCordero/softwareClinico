@@ -1,19 +1,25 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Branch } from '../module-branch/entity/branch.entity';
+import { Permission } from '../module-permission/entity/permission.entity';
+import { Person } from '../module-person/entity/person.entity';
+import { Role } from '../module-role/entity/role.entity';
+import { AuthorizationService } from './authorization.service';
 import { User } from './entity/user.entity';
-import { UserRole } from './entity/user-role.entity';
 import { UserPermissionOverride } from './entity/user-permission-override.entity';
+import { UserRole } from './entity/user-role.entity';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
+@Global()
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      User,
-      UserRole,
-      UserPermissionOverride,
-    ]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    TypeOrmModule.forFeature([User, UserRole, UserPermissionOverride, Person, Role, Branch, Permission]),
   ],
-  providers: [],
-  controllers: [],
-  exports: [],
+  controllers: [UserController],
+  providers: [UserService, AuthorizationService],
+  exports: [UserService, AuthorizationService],
 })
 export class UserModule {}

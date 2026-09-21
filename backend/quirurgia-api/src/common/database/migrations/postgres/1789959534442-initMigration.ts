@@ -1,27 +1,27 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class InitMigration1788820234506 implements MigrationInterface {
-    name = 'InitMigration1788820234506'
+export class InitMigration1789959534442 implements MigrationInterface {
+    name = 'InitMigration1789959534442'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TYPE "public"."person_sex_enum" AS ENUM('MALE', 'FEMALE', 'UNSPECIFIED')`);
         await queryRunner.query(`CREATE TABLE "person" ("personId" SERIAL NOT NULL, "first_name" character varying NOT NULL, "middle_name" character varying, "last_name" character varying NOT NULL, "second_last_name" character varying, "birth_date" date NOT NULL, "sex" "public"."person_sex_enum" NOT NULL, "curp" character varying, "rfc" character varying, "phone" character varying NOT NULL, "secondary_phone" character varying, "email" character varying, "address" character varying, "city" character varying, "state" character varying, "postal_code" character varying, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP WITH TIME ZONE, CONSTRAINT "PK_84a53bea0e639207a7702250a4d" PRIMARY KEY ("personId"))`);
-        await queryRunner.query(`CREATE TYPE "public"."user_status_enum" AS ENUM('PENDING', 'ACTIVE', 'SUSPENDED', 'BLOCKED', 'DISABLED')`);
-        await queryRunner.query(`CREATE TABLE "user" ("userId" SERIAL NOT NULL, "username" character varying NOT NULL, "email" character varying NOT NULL, "password_hash" character varying NOT NULL, "status" "public"."user_status_enum" NOT NULL, "email_verified_at" TIMESTAMP WITH TIME ZONE, "last_login_at" TIMESTAMP WITH TIME ZONE, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP WITH TIME ZONE, "person_id" integer, CONSTRAINT "PK_d72ea127f30e21753c9e229891e" PRIMARY KEY ("userId"))`);
-        await queryRunner.query(`CREATE TYPE "public"."role_type_enum" AS ENUM('SYSTEM', 'CUSTOM')`);
-        await queryRunner.query(`CREATE TYPE "public"."role_status_enum" AS ENUM('ACTIVE', 'DISABLED')`);
-        await queryRunner.query(`CREATE TABLE "role" ("roleId" SERIAL NOT NULL, "name" character varying NOT NULL, "description" text NOT NULL, "type" "public"."role_type_enum" NOT NULL, "status" "public"."role_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_703705ba862c2bb45250962c9e1" PRIMARY KEY ("roleId"))`);
+        await queryRunner.query(`CREATE TYPE "public"."branch_status_enum" AS ENUM('ACTIVE', 'TEMPORARILY_CLOSED', 'INACTIVE')`);
+        await queryRunner.query(`CREATE TABLE "branch" ("branchId" SERIAL NOT NULL, "code" character varying NOT NULL, "name" character varying NOT NULL, "phone" character varying NOT NULL, "email" character varying NOT NULL, "address" character varying NOT NULL, "city" character varying NOT NULL, "state" character varying NOT NULL, "postal_code" character varying NOT NULL, "timezone" character varying NOT NULL, "status" "public"."branch_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_fb866244483fa1634abef9f1271" PRIMARY KEY ("branchId"))`);
         await queryRunner.query(`CREATE TYPE "public"."permission_status_enum" AS ENUM('ACTIVE', 'DEPRECATED', 'DISABLED')`);
         await queryRunner.query(`CREATE TABLE "permission" ("permissionId" SERIAL NOT NULL, "code" character varying NOT NULL, "module" character varying NOT NULL, "resource" character varying NOT NULL, "action" character varying NOT NULL, "description" text NOT NULL, "status" "public"."permission_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_86b314be9c1be5c62b3a9d97ae4" PRIMARY KEY ("permissionId"))`);
         await queryRunner.query(`CREATE TABLE "role_permission" ("rolePermissionId" SERIAL NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "role_id" integer NOT NULL, "permission_id" integer NOT NULL, CONSTRAINT "UQ_role_permissions_role_permission" UNIQUE ("role_id", "permission_id"), CONSTRAINT "PK_4f6a0c2c1f39ff29564d33b8662" PRIMARY KEY ("rolePermissionId"))`);
-        await queryRunner.query(`CREATE TYPE "public"."branch_status_enum" AS ENUM('ACTIVE', 'TEMPORARILY_CLOSED', 'INACTIVE')`);
-        await queryRunner.query(`CREATE TABLE "branch" ("branchId" SERIAL NOT NULL, "code" character varying NOT NULL, "name" character varying NOT NULL, "phone" character varying NOT NULL, "email" character varying NOT NULL, "address" character varying NOT NULL, "city" character varying NOT NULL, "state" character varying NOT NULL, "postal_code" character varying NOT NULL, "timezone" character varying NOT NULL, "status" "public"."branch_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_fb866244483fa1634abef9f1271" PRIMARY KEY ("branchId"))`);
+        await queryRunner.query(`CREATE TYPE "public"."role_type_enum" AS ENUM('SYSTEM', 'CUSTOM')`);
+        await queryRunner.query(`CREATE TYPE "public"."role_status_enum" AS ENUM('ACTIVE', 'DISABLED')`);
+        await queryRunner.query(`CREATE TABLE "role" ("roleId" SERIAL NOT NULL, "name" character varying NOT NULL, "description" text NOT NULL, "type" "public"."role_type_enum" NOT NULL, "status" "public"."role_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_703705ba862c2bb45250962c9e1" PRIMARY KEY ("roleId"))`);
         await queryRunner.query(`CREATE TYPE "public"."user_role_status_enum" AS ENUM('ACTIVE', 'SUSPENDED', 'EXPIRED', 'REVOKED')`);
         await queryRunner.query(`CREATE TABLE "user_role" ("userRoleId" SERIAL NOT NULL, "status" "public"."user_role_status_enum" NOT NULL, "valid_from" TIMESTAMP WITH TIME ZONE, "valid_until" TIMESTAMP WITH TIME ZONE, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" integer NOT NULL, "role_id" integer NOT NULL, "branch_id" integer, CONSTRAINT "PK_84dd97c990a5700a09c2a202b72" PRIMARY KEY ("userRoleId"))`);
         await queryRunner.query(`CREATE TYPE "public"."user_permission_override_effect_enum" AS ENUM('ALLOW', 'DENY')`);
         await queryRunner.query(`CREATE TYPE "public"."user_permission_override_status_enum" AS ENUM('ACTIVE', 'EXPIRED', 'REVOKED')`);
         await queryRunner.query(`CREATE TABLE "user_permission_override" ("userPermissionOverrideId" SERIAL NOT NULL, "effect" "public"."user_permission_override_effect_enum" NOT NULL, "status" "public"."user_permission_override_status_enum" NOT NULL, "reason" text, "valid_from" TIMESTAMP WITH TIME ZONE, "valid_until" TIMESTAMP WITH TIME ZONE, "created_by" integer NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" integer NOT NULL, "permission_id" integer NOT NULL, "branch_id" integer, CONSTRAINT "PK_4e1ae202d67ec279d394b659ddc" PRIMARY KEY ("userPermissionOverrideId"))`);
-        await queryRunner.query(`CREATE TABLE "audit_log" ("auditLogId" SERIAL NOT NULL, "user_id" integer, "action" character varying NOT NULL, "module" character varying NOT NULL, "entity_type" character varying NOT NULL, "entity_id" integer, "old_values" jsonb, "new_values" jsonb, "occurred_at" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_16e719e570e70a2e277569d4d94" PRIMARY KEY ("auditLogId"))`);
+        await queryRunner.query(`CREATE TYPE "public"."user_status_enum" AS ENUM('PENDING', 'ACTIVE', 'SUSPENDED', 'BLOCKED', 'DISABLED')`);
+        await queryRunner.query(`CREATE TABLE "user" ("userId" SERIAL NOT NULL, "username" character varying NOT NULL, "email" character varying NOT NULL, "password_hash" character varying NOT NULL, "status" "public"."user_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "deleted_at" TIMESTAMP WITH TIME ZONE, "person_id" integer, CONSTRAINT "PK_d72ea127f30e21753c9e229891e" PRIMARY KEY ("userId"))`);
+        await queryRunner.query(`CREATE TABLE "audit_log" ("auditLogId" SERIAL NOT NULL, "action" character varying NOT NULL, "module" character varying NOT NULL, "entity_type" character varying NOT NULL, "entity_id" integer, "old_values" jsonb, "new_values" jsonb, "occurred_at" TIMESTAMP WITH TIME ZONE NOT NULL, "user_id" integer, CONSTRAINT "PK_16e719e570e70a2e277569d4d94" PRIMARY KEY ("auditLogId"))`);
         await queryRunner.query(`CREATE TYPE "public"."area_status_enum" AS ENUM('ACTIVE', 'INACTIVE')`);
         await queryRunner.query(`CREATE TABLE "area" ("areaId" SERIAL NOT NULL, "name" character varying NOT NULL, "description" text NOT NULL, "status" "public"."area_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "branch_id" integer NOT NULL, "parent_area_id" integer, CONSTRAINT "PK_48465cf333cad84a2a3ef535434" PRIMARY KEY ("areaId"))`);
         await queryRunner.query(`CREATE TYPE "public"."consulting_room_status_enum" AS ENUM('AVAILABLE', 'MAINTENANCE', 'TEMPORARILY_UNAVAILABLE', 'INACTIVE')`);
@@ -97,12 +97,12 @@ export class InitMigration1788820234506 implements MigrationInterface {
         await queryRunner.query(`CREATE TYPE "public"."order_detail_status_enum" AS ENUM('PENDING', 'PROVIDED', 'CANCELLED', 'REFUNDED')`);
         await queryRunner.query(`CREATE TABLE "order_detail" ("orderDetailId" SERIAL NOT NULL, "description" text NOT NULL, "quantity" integer NOT NULL, "unit_price" numeric(14,2) NOT NULL, "discount" numeric(14,2) NOT NULL, "tax" numeric(14,2) NOT NULL, "total" numeric(14,2) NOT NULL, "status" "public"."order_detail_status_enum" NOT NULL, "order_id" integer NOT NULL, "service_id" integer NOT NULL, CONSTRAINT "PK_344d520ab13c07c86096a8a3c72" PRIMARY KEY ("orderDetailId"))`);
         await queryRunner.query(`CREATE TYPE "public"."payment_method_status_enum" AS ENUM('ACTIVE', 'INACTIVE')`);
-        await queryRunner.query(`CREATE TABLE "payment_method" ("paymentMethodId" SERIAL NOT NULL, "name" character varying NOT NULL, "code" character varying NOT NULL, "status" "public"."payment_method_status_enum" NOT NULL, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_c07b0b12b34981558fc7612ee8a" PRIMARY KEY ("paymentMethodId"))`);
+        await queryRunner.query(`CREATE TABLE "payment_method" ("paymentMethodId" SERIAL NOT NULL, "name" character varying NOT NULL, "code" character varying NOT NULL, "status" "public"."payment_method_status_enum" NOT NULL DEFAULT 'ACTIVE', "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_c07b0b12b34981558fc7612ee8a" PRIMARY KEY ("paymentMethodId"))`);
         await queryRunner.query(`CREATE TYPE "public"."payment_status_enum" AS ENUM('PENDING', 'CONFIRMED', 'FAILED', 'CANCELLED', 'REFUNDED', 'PARTIALLY_REFUNDED')`);
         await queryRunner.query(`CREATE TABLE "payment" ("paymentId" SERIAL NOT NULL, "amount" numeric(14,2) NOT NULL, "reference" character varying, "status" "public"."payment_status_enum" NOT NULL, "paid_at" TIMESTAMP WITH TIME ZONE NOT NULL, "notes" text, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "order_id" integer NOT NULL, "payment_method_id" integer NOT NULL, "registered_by" integer NOT NULL, CONSTRAINT "PK_67ee4523b649947b6a7954dc673" PRIMARY KEY ("paymentId"))`);
-        await queryRunner.query(`CREATE TYPE "public"."auth_session_status_enum" AS ENUM('ACTIVE', 'EXPIRED', 'REVOKED')`);
-        await queryRunner.query(`CREATE TABLE "auth_session" ("authSessionId" SERIAL NOT NULL, "refresh_token_hash" character varying NOT NULL, "status" "public"."auth_session_status_enum" NOT NULL, "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL, "revoked_at" TIMESTAMP WITH TIME ZONE, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" integer NOT NULL, CONSTRAINT "PK_4564727576782e8ab59628d935e" PRIMARY KEY ("authSessionId"))`);
-        await queryRunner.query(`ALTER TABLE "user" ADD CONSTRAINT "FK_a4cee7e601d219733b064431fba" FOREIGN KEY ("person_id") REFERENCES "person"("personId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`CREATE TABLE "auth_session" ("sid" uuid NOT NULL DEFAULT uuid_generate_v4(), "refresh_hash" character varying(64) NOT NULL, "current_jti" uuid NOT NULL, "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL, "revoked_at" TIMESTAMP WITH TIME ZONE, "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "user_id" integer, CONSTRAINT "PK_c0657c47c2edff2162c809a9094" PRIMARY KEY ("sid"))`);
+        await queryRunner.query(`CREATE UNIQUE INDEX "UQ_auth_session_current_jti" ON "auth_session"  ("current_jti") `);
+        await queryRunner.query(`CREATE UNIQUE INDEX "UQ_auth_session_active_user" ON "auth_session"  ("user_id") WHERE "revoked_at" IS NULL`);
         await queryRunner.query(`ALTER TABLE "role_permission" ADD CONSTRAINT "FK_3d0a7155eafd75ddba5a7013368" FOREIGN KEY ("role_id") REFERENCES "role"("roleId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "role_permission" ADD CONSTRAINT "FK_e3a3ba47b7ca00fd23be4ebd6cf" FOREIGN KEY ("permission_id") REFERENCES "permission"("permissionId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "user_role" ADD CONSTRAINT "FK_d0e5815877f7395a198a4cb0a46" FOREIGN KEY ("user_id") REFERENCES "user"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -112,6 +112,7 @@ export class InitMigration1788820234506 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "user_permission_override" ADD CONSTRAINT "FK_da829fa2e592d3202422745ab06" FOREIGN KEY ("permission_id") REFERENCES "permission"("permissionId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "user_permission_override" ADD CONSTRAINT "FK_62bf116306104502e4734223898" FOREIGN KEY ("branch_id") REFERENCES "branch"("branchId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "user_permission_override" ADD CONSTRAINT "FK_c163495d186f4286b8f31b64344" FOREIGN KEY ("created_by") REFERENCES "user"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "user" ADD CONSTRAINT "FK_a4cee7e601d219733b064431fba" FOREIGN KEY ("person_id") REFERENCES "person"("personId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "audit_log" ADD CONSTRAINT "FK_cb11bd5b662431ea0ac455a27d7" FOREIGN KEY ("user_id") REFERENCES "user"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "area" ADD CONSTRAINT "FK_7681073b1678604c799416e99a1" FOREIGN KEY ("branch_id") REFERENCES "branch"("branchId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "area" ADD CONSTRAINT "FK_ebafd64d6f7c07d856b5820504e" FOREIGN KEY ("parent_area_id") REFERENCES "area"("areaId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -188,7 +189,7 @@ export class InitMigration1788820234506 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "payment" ADD CONSTRAINT "FK_f5221735ace059250daac9d9803" FOREIGN KEY ("order_id") REFERENCES "order"("orderId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "payment" ADD CONSTRAINT "FK_365af7f69f9142427cf30395b00" FOREIGN KEY ("payment_method_id") REFERENCES "payment_method"("paymentMethodId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "payment" ADD CONSTRAINT "FK_feb5353357b651e4c8d8576684f" FOREIGN KEY ("registered_by") REFERENCES "user"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "auth_session" ADD CONSTRAINT "FK_b8783d517fab10672700a39cb49" FOREIGN KEY ("user_id") REFERENCES "user"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "auth_session" ADD CONSTRAINT "FK_b8783d517fab10672700a39cb49" FOREIGN KEY ("user_id") REFERENCES "user"("userId") ON DELETE CASCADE ON UPDATE NO ACTION`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
@@ -269,6 +270,7 @@ export class InitMigration1788820234506 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "area" DROP CONSTRAINT "FK_ebafd64d6f7c07d856b5820504e"`);
         await queryRunner.query(`ALTER TABLE "area" DROP CONSTRAINT "FK_7681073b1678604c799416e99a1"`);
         await queryRunner.query(`ALTER TABLE "audit_log" DROP CONSTRAINT "FK_cb11bd5b662431ea0ac455a27d7"`);
+        await queryRunner.query(`ALTER TABLE "user" DROP CONSTRAINT "FK_a4cee7e601d219733b064431fba"`);
         await queryRunner.query(`ALTER TABLE "user_permission_override" DROP CONSTRAINT "FK_c163495d186f4286b8f31b64344"`);
         await queryRunner.query(`ALTER TABLE "user_permission_override" DROP CONSTRAINT "FK_62bf116306104502e4734223898"`);
         await queryRunner.query(`ALTER TABLE "user_permission_override" DROP CONSTRAINT "FK_da829fa2e592d3202422745ab06"`);
@@ -278,9 +280,9 @@ export class InitMigration1788820234506 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "user_role" DROP CONSTRAINT "FK_d0e5815877f7395a198a4cb0a46"`);
         await queryRunner.query(`ALTER TABLE "role_permission" DROP CONSTRAINT "FK_e3a3ba47b7ca00fd23be4ebd6cf"`);
         await queryRunner.query(`ALTER TABLE "role_permission" DROP CONSTRAINT "FK_3d0a7155eafd75ddba5a7013368"`);
-        await queryRunner.query(`ALTER TABLE "user" DROP CONSTRAINT "FK_a4cee7e601d219733b064431fba"`);
+        await queryRunner.query(`DROP INDEX "public"."UQ_auth_session_active_user"`);
+        await queryRunner.query(`DROP INDEX "public"."UQ_auth_session_current_jti"`);
         await queryRunner.query(`DROP TABLE "auth_session"`);
-        await queryRunner.query(`DROP TYPE "public"."auth_session_status_enum"`);
         await queryRunner.query(`DROP TABLE "payment"`);
         await queryRunner.query(`DROP TYPE "public"."payment_status_enum"`);
         await queryRunner.query(`DROP TABLE "payment_method"`);
@@ -360,21 +362,21 @@ export class InitMigration1788820234506 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "area"`);
         await queryRunner.query(`DROP TYPE "public"."area_status_enum"`);
         await queryRunner.query(`DROP TABLE "audit_log"`);
+        await queryRunner.query(`DROP TABLE "user"`);
+        await queryRunner.query(`DROP TYPE "public"."user_status_enum"`);
         await queryRunner.query(`DROP TABLE "user_permission_override"`);
         await queryRunner.query(`DROP TYPE "public"."user_permission_override_status_enum"`);
         await queryRunner.query(`DROP TYPE "public"."user_permission_override_effect_enum"`);
         await queryRunner.query(`DROP TABLE "user_role"`);
         await queryRunner.query(`DROP TYPE "public"."user_role_status_enum"`);
-        await queryRunner.query(`DROP TABLE "branch"`);
-        await queryRunner.query(`DROP TYPE "public"."branch_status_enum"`);
-        await queryRunner.query(`DROP TABLE "role_permission"`);
-        await queryRunner.query(`DROP TABLE "permission"`);
-        await queryRunner.query(`DROP TYPE "public"."permission_status_enum"`);
         await queryRunner.query(`DROP TABLE "role"`);
         await queryRunner.query(`DROP TYPE "public"."role_status_enum"`);
         await queryRunner.query(`DROP TYPE "public"."role_type_enum"`);
-        await queryRunner.query(`DROP TABLE "user"`);
-        await queryRunner.query(`DROP TYPE "public"."user_status_enum"`);
+        await queryRunner.query(`DROP TABLE "role_permission"`);
+        await queryRunner.query(`DROP TABLE "permission"`);
+        await queryRunner.query(`DROP TYPE "public"."permission_status_enum"`);
+        await queryRunner.query(`DROP TABLE "branch"`);
+        await queryRunner.query(`DROP TYPE "public"."branch_status_enum"`);
         await queryRunner.query(`DROP TABLE "person"`);
         await queryRunner.query(`DROP TYPE "public"."person_sex_enum"`);
     }

@@ -1,7 +1,9 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Person } from '../../module-person/entity/person.entity';
 import { UserStatus } from '../enum/user-status.enum';
+import { UserRole } from './user-role.entity';
+import { UserPermissionOverride } from './user-permission-override.entity';
 
 @Entity('user')
 export class User {
@@ -24,12 +26,6 @@ export class User {
   @Column({ type: 'enum', enum: UserStatus, name: 'status' })
   status: UserStatus;
 
-  @Column({ name: 'email_verified_at', type: 'timestamptz', nullable: true })
-  emailVerifiedAt: Date | null;
-
-  @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
-  lastLoginAt: Date | null;
-
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
@@ -38,4 +34,10 @@ export class User {
 
   @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true })
   deletedAt: Date | null;
+
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoles: Relation<UserRole>[];
+
+  @OneToMany(() => UserPermissionOverride, (override) => override.user)
+  permissionOverrides: Relation<UserPermissionOverride>[];
 }

@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { createObserveModule } from '@nestjs/observe';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './common/module/config.module';
 import { DatabaseModule } from './common/module/database.module';
 import { LoggerConfigModule } from './common/module/logger.module';
@@ -38,6 +41,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AppConfigModule,
     LoggerConfigModule,
     DatabaseModule,
+    EventEmitterModule.forRoot(),
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     AuthModule,
     UserModule,
     RoleModule,
@@ -67,6 +72,6 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PaymentModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

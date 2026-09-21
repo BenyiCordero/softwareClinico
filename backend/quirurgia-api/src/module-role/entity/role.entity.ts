@@ -1,6 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { RoleStatus } from '../enum/role-status.enum';
 import { RoleType } from '../enum/role-type.enum';
+import { RolePermission } from './role-permission.entity';
 
 @Entity('role')
 export class Role {
@@ -24,4 +26,7 @@ export class Role {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.role)
+  rolePermissions: Relation<RolePermission>[];
 }

@@ -1,13 +1,52 @@
-import { Controller, Post } from "@nestjs/common";
-import { PaymentMethodService } from "./payment-method.service";
-import { PaymentMethodResponseDto } from "./dto/res/payment-method-response.dto";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
+import { CreatePaymentMethodDto } from './dto/request/create-payment-method.dto';
+import { FindPaymentMethodQueryDto } from './dto/request/find-payment-method-query.dto';
+import { UpdatePaymentMethodDto } from './dto/request/update-payment-method.dto';
+import { PaymentMethodResponseDto } from './dto/res/payment-method-response.dto';
+import { PaymentMethodService } from './payment-method.service';
 
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('payment-method')
 export class PaymentMethodController {
-    constructor(private readonly paymentMethodService: PaymentMethodService) {}
+  constructor(private readonly paymentMethodService: PaymentMethodService) {}
 
-    @Post()
-    createPaymentMethod(dto: CreatePaymentMethodDto): PaymentMethodResponseDto {
-        this.paymentMethodService.createPaymentMethod(dto); //Here it doesnt work yet, bc ive not implemented the service method, and i must to implement the pagination and the auth first, but if you do your services before i implement auth/pagination, just return it as normally
-    }
+  @RequirePermissions('payment-methods.read')
+  @Get()
+  findAll(
+    @Query() query?: FindPaymentMethodQueryDto,
+  ): Promise<OffsetPaginatedResult<PaymentMethodResponseDto>> {
+    return this.paymentMethodService.findAll(query);
+  }
+
+  @RequirePermissions('payment-methods.read')
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<PaymentMethodResponseDto> {
+    return this.paymentMethodService.findOne(id);
+  }
+
+  @RequirePermissions('payment-methods.manage')
+  @Post()
+  create(@Body() dto: CreatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
+    return this.paymentMethodService.create(dto);
+  }
+
+  @RequirePermissions('payment-methods.manage')
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePaymentMethodDto,
+  ): Promise<PaymentMethodResponseDto> {
+    return this.paymentMethodService.update(id, dto);
+  }
+
+  @RequirePermissions('payment-methods.manage')
+  @HttpCode(204)
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.paymentMethodService.remove(id);
+  }
 }
