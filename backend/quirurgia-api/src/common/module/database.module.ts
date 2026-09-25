@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { DatabaseExceptionMapper } from '../database/errors/database-exception.mapper';
 
 @Module({
   imports: [
@@ -20,8 +21,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       }),
     }),
   ],
+  providers: [
+    DatabaseExceptionMapper
+  ],
   exports: [
     TypeOrmModule,
+    DatabaseExceptionMapper
   ],
 })
 export class DatabaseModule {}

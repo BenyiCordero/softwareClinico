@@ -6,10 +6,14 @@ import { LoggerConfigModule } from '../common/module/logger.module';
 import { UserModule } from '../module-user/user.module';
 import { PermissionModule } from '../module-permission/permission.module';
 import { RoleModule } from '../module-role/role.module';
+import { Person } from '../module-person/entity/person.entity';
+import { Role } from '../module-role/entity/role.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
+    TypeOrmModule.forFeature([Role, Person]),
     AppConfigModule,
     LoggerConfigModule,
     DatabaseModule,
