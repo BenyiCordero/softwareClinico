@@ -28,13 +28,13 @@ export class PaymentMethodController {
     return this.paymentMethodService.findOne(id);
   }
 
-  @RequirePermissions('payment-methods.manage')
+  @RequirePermissions('payment-methods.create')
   @Post()
   create(@Body() dto: CreatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
     return this.paymentMethodService.create(dto);
   }
 
-  @RequirePermissions('payment-methods.manage')
+  @RequirePermissions('payment-methods.update')
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -43,7 +43,7 @@ export class PaymentMethodController {
     return this.paymentMethodService.update(id, dto);
   }
 
-  @RequirePermissions('payment-methods.manage')
+  @RequirePermissions('payment-methods.delete')
   @HttpCode(204)
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {

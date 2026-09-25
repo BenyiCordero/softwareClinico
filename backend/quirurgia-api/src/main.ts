@@ -22,7 +22,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.enableShutdownHooks();
-  app.setGlobalPrefix('api/v2');
+  app.setGlobalPrefix('api/v1');
 
   const configService = app.get(ConfigService);
   const allowedOrigins = configService.getOrThrow('CORS_ORIGINS').split(',').map((origin: string) => origin.trim());

@@ -3,6 +3,7 @@ export enum PermissionAction {
   READ = 'read',
   UPDATE = 'update',
   ARCHIVE = 'archive',
+  DELETE = 'delete',
 
   ASSIGN = 'assign',
   UNASSIGN = 'unassign',

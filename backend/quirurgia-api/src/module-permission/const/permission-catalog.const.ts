@@ -210,6 +210,7 @@ export const PERMISSION_CATALOG: Record<PermissionResource, readonly PermissionA
     PermissionAction.CREATE,
     PermissionAction.READ,
     PermissionAction.UPDATE,
+    PermissionAction.DELETE,
     PermissionAction.ARCHIVE,
     PermissionAction.ACTIVATE,
     PermissionAction.DEACTIVATE,

@@ -75,7 +75,7 @@ export class UserController {
     return this.userService.changePassword(id, dto);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.update')
   @Patch(':id/status')
   changeStatus(
     @Param('id', ParseIntPipe) id: number,
@@ -86,7 +86,7 @@ export class UserController {
     return this.userService.changeStatus(id, dto, actor.userId);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.manage_roles')
   @Post(':id/roles')
   assignRole(
     @Param('id', ParseIntPipe) id: number,
@@ -95,7 +95,7 @@ export class UserController {
     return this.userService.assignRole(id, dto);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.manage_roles')
   @HttpCode(204)
   @Patch(':id/roles/:userRoleId/revoke')
   async revokeRole(
@@ -105,7 +105,7 @@ export class UserController {
     await this.userService.revokeRole(id, userRoleId);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.manage_overrides')
   @HttpCode(204)
   @Post(':id/permission-overrides')
   async createPermissionOverride(
@@ -117,7 +117,7 @@ export class UserController {
     await this.userService.createPermissionOverride(id, dto, actor.userId);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.manage_overrides')
   @HttpCode(204)
   @Patch(':id/permission-overrides/:overrideId/revoke')
   async revokePermissionOverride(
