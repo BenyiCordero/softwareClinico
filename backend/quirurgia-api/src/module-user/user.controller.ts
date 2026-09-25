@@ -48,7 +48,7 @@ export class UserController {
     return this.userService.findOne(actor.userId);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.create')
   @Post()
   create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     return this.userService.create(dto);
@@ -60,13 +60,13 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.update')
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UserUpdateDto): Promise<UserResponseDto> {
     return this.userService.update(id, dto);
   }
 
-  @RequirePermissions('users.manage')
+  @RequirePermissions('users.change_password')
   @Patch(':id/password')
   changePassword(
     @Param('id', ParseIntPipe) id: number,

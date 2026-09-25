@@ -11,36 +11,23 @@ import { Person } from '../../module-person/entity/person.entity';
 import { Sex } from '../../module-person/enum/sex.enum';
 import { PermissionService } from '../../module-permission/permission.service';
 import { PermissionResource } from '../../module-permission/enum/permission-resource.enum';
-import { PermissionAction } from '../../module-permission/enum/permission-action.enum';
+import { PERMISSION_CATALOG } from '../../module-permission/const/permission-catalog.const';
 import { CreatePermissionDto } from '../../module-permission/dto/request/create-permission.dto';
 import { RolePermissionService } from '../../module-role/role-permission.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UserRole } from '../../module-user/entity/user-role.entity';
+import { UserRoleStatus } from '../../module-user/enum/user-role-status.enum';
 
 const ADMIN_ROLE_NAME = 'admin';
 
-const initialPermissions: CreatePermissionDto[] = [
-  {
-    resource: PermissionResource.USERS,
-    action: PermissionAction.MANAGE,
-    description: 'Allows managing users',
-  },
-  {
-    resource: PermissionResource.USERS,
-    action: PermissionAction.READ,
-    description: 'Allows reading users',
-  },
-  {
-    resource: PermissionResource.PAYMENT_METHODS,
-    action: PermissionAction.MANAGE,
-    description: 'Allows managing payment methods',
-  },
-  {
-    resource: PermissionResource.PAYMENT_METHODS,
-    action: PermissionAction.READ,
-    description: 'Allows reading payment methods',
-  },
-];
+const initialPermissions: CreatePermissionDto[] = Object.values(PermissionResource).flatMap((resource) =>
+  PERMISSION_CATALOG[resource].map((action) => ({
+    resource,
+    action,
+    description: `Allows ${action.replaceAll('_', ' ')} on ${resource}`,
+  })),
+);
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(CliModule);
@@ -56,6 +43,9 @@ async function bootstrap() {
     );
     const personRepository = app.get<Repository<Person>>(
       getRepositoryToken(Person),
+    );
+    const userRoleRepository = app.get<Repository<UserRole>>(
+      getRepositoryToken(UserRole),
     );
 
     const email = configService.get<string>('ADMIN_EMAIL')?.trim().toLowerCase();
@@ -99,9 +89,34 @@ async function bootstrap() {
     const existingUser = await userService.findByEmail(email);
 
     if (existingUser) {
+      const adminRoleAssignment = await userRoleRepository
+        .createQueryBuilder('userRole')
+        .where('userRole.user_id = :userId', { userId: existingUser.userId })
+        .andWhere('userRole.role_id = :roleId', { roleId: role.roleId })
+        .andWhere(branchId ? 'userRole.branch_id = :branchId' : 'userRole.branch_id IS NULL', { branchId })
+        .andWhere('userRole.status = :status', { status: UserRoleStatus.ACTIVE })
+        .getOne();
+
+      if (!adminRoleAssignment) {
+        await userRoleRepository.save(
+          userRoleRepository.create({
+            user: { userId: existingUser.userId },
+            role: { roleId: role.roleId },
+            branch: branchId ? { branchId } : null,
+            status: UserRoleStatus.ACTIVE,
+            validFrom: new Date(),
+            validUntil: null,
+          }),
+        );
+        logger.info(
+          { userId: existingUser.userId, roleId: role.roleId, branchId },
+          'Administrator role assigned to existing user',
+        );
+      }
+
       logger.warn(
         { userId: existingUser.userId, roleId: role.roleId },
-        'Administrator user already exists; role permissions were ensured',
+        'Administrator user already exists; permissions and role assignment were ensured',
       );
       return;
     }
@@ -115,7 +130,6 @@ async function bootstrap() {
         birthDate,
         sex,
         curp: null,
-        rfc: null,
         phone,
         secondaryPhone: null,
         email,
