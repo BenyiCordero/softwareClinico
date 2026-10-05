@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
 import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
 import { CreateServiceCategoryDto } from './dto/request/create-service-category.dto';
@@ -9,10 +10,15 @@ import { UpdateServiceCategoryDto } from './dto/request/update-service-category.
 import { ServiceCategoryMapper } from './dto/service-category.mapper';
 import { ServiceCategoryResponseDto } from './dto/response/service-category-response.dto';
 import { ServiceCategory } from './entity/service-category.entity';
+import { ServiceCategoryStatus } from './enum/service-category-status.enum';
+import { SERVICE_CATEGORY_CONSTRAINT_MAP } from './const/service-category.constraint';
 
 @Injectable()
 export class ServiceCategoryService {
-  constructor(@InjectRepository(ServiceCategory) private readonly repository: Repository<ServiceCategory>) {}
+  constructor(
+    @InjectRepository(ServiceCategory) private readonly repository: Repository<ServiceCategory>,
+    private readonly databaseExceptionMapper: DatabaseExceptionMapper,
+  ) {}
 
   async findAll(filters: FindServiceCategoryQueryDto = {}): Promise<OffsetPaginatedResult<ServiceCategoryResponseDto>> {
     const page = filters.page ?? 1;
@@ -44,7 +50,11 @@ export class ServiceCategoryService {
       description: dto.description,
       parentCategory: parent,
     });
-    return ServiceCategoryMapper.toResponseDto(await this.repository.save(category));
+    try {
+      return ServiceCategoryMapper.toResponseDto(await this.repository.save(category));
+    } catch (error: unknown) {
+      throw this.databaseExceptionMapper.fromTypeOrmError(error, SERVICE_CATEGORY_CONSTRAINT_MAP);
+    }
   }
 
   async update(id: number, dto: UpdateServiceCategoryDto): Promise<ServiceCategoryResponseDto> {
@@ -66,14 +76,18 @@ export class ServiceCategoryService {
     if (dto.name !== undefined) category.name = dto.name;
     if (dto.description !== undefined) category.description = dto.description;
     if (dto.status !== undefined) category.status = dto.status;
-    return ServiceCategoryMapper.toResponseDto(await this.repository.save(category));
+    try {
+      return ServiceCategoryMapper.toResponseDto(await this.repository.save(category));
+    } catch (error: unknown) {
+      throw this.databaseExceptionMapper.fromTypeOrmError(error, SERVICE_CATEGORY_CONSTRAINT_MAP);
+    }
   }
 
   async remove(id: number): Promise<void> {
-    await this.findByIdOrThrow(id);
-    const child = await this.repository.findOne({ where: { parentCategory: { serviceCategoryId: id } } });
-    if (child) throw new ConflictException('Cannot remove a category with child categories');
-    await this.repository.delete(id);
+    const category = await this.findByIdOrThrow(id);
+    if (category.status === ServiceCategoryStatus.INACTIVE) return;
+    category.status = ServiceCategoryStatus.INACTIVE;
+    await this.repository.save(category);
   }
 
   private async findByIdOrThrow(id: number): Promise<ServiceCategory> {

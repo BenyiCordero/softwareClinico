@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
 import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
 import { CreateSpecialtyDto } from './dto/request/create-specialty.dto';
@@ -9,10 +10,15 @@ import { UpdateSpecialtyDto } from './dto/request/update-specialty.dto';
 import { SpecialtyMapper } from './dto/specialty.mapper';
 import { SpecialtyResponseDto } from './dto/response/specialty-response.dto';
 import { Specialty } from './entity/specialty.entity';
+import { SpecialtyStatus } from './enum/specialty-status.enum';
+import { SPECIALTY_CONSTRAINT_MAP } from './const/specialty.constraint';
 
 @Injectable()
 export class SpecialtyService {
-  constructor(@InjectRepository(Specialty) private readonly repository: Repository<Specialty>) {}
+  constructor(
+    @InjectRepository(Specialty) private readonly repository: Repository<Specialty>,
+    private readonly databaseExceptionMapper: DatabaseExceptionMapper,
+  ) {}
 
   async findAll(filters: FindSpecialtyQueryDto = {}): Promise<OffsetPaginatedResult<SpecialtyResponseDto>> {
     const page = filters.page ?? 1;
@@ -34,18 +40,28 @@ export class SpecialtyService {
 
   async create(dto: CreateSpecialtyDto): Promise<SpecialtyResponseDto> {
     await this.ensureNameAvailable(dto.name);
-    return SpecialtyMapper.toResponseDto(await this.repository.save(this.repository.create(dto)));
+    try {
+      return SpecialtyMapper.toResponseDto(await this.repository.save(this.repository.create(dto)));
+    } catch (error: unknown) {
+      throw this.databaseExceptionMapper.fromTypeOrmError(error, SPECIALTY_CONSTRAINT_MAP);
+    }
   }
 
   async update(id: number, dto: UpdateSpecialtyDto): Promise<SpecialtyResponseDto> {
     const specialty = await this.findByIdOrThrow(id);
     if (dto.name && dto.name !== specialty.name) await this.ensureNameAvailable(dto.name, id);
-    return SpecialtyMapper.toResponseDto(await this.repository.save(this.repository.merge(specialty, dto)));
+    try {
+      return SpecialtyMapper.toResponseDto(await this.repository.save(this.repository.merge(specialty, dto)));
+    } catch (error: unknown) {
+      throw this.databaseExceptionMapper.fromTypeOrmError(error, SPECIALTY_CONSTRAINT_MAP);
+    }
   }
 
   async remove(id: number): Promise<void> {
-    await this.findByIdOrThrow(id);
-    await this.repository.delete(id);
+    const specialty = await this.findByIdOrThrow(id);
+    if (specialty.status === SpecialtyStatus.INACTIVE) return;
+    specialty.status = SpecialtyStatus.INACTIVE;
+    await this.repository.save(specialty);
   }
 
   private async findByIdOrThrow(id: number): Promise<Specialty> {

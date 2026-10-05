@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
 import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
 import { CreatePatientCategoryDto } from './dto/request/create-patient-category.dto';
@@ -9,10 +10,15 @@ import { UpdatePatientCategoryDto } from './dto/request/update-patient-category.
 import { PatientCategoryMapper } from './dto/patient-category.mapper';
 import { PatientCategoryResponseDto } from './dto/response/patient-category-response.dto';
 import { PatientCategory } from './entity/patient-category.entity';
+import { PatientCategoryStatus } from './enum/patient-category-status.enum';
+import { PATIENT_CATEGORY_CONSTRAINT_MAP } from './const/patient-category.constraint';
 
 @Injectable()
 export class PatientCategoryService {
-  constructor(@InjectRepository(PatientCategory) private readonly repository: Repository<PatientCategory>) {}
+  constructor(
+    @InjectRepository(PatientCategory) private readonly repository: Repository<PatientCategory>,
+    private readonly databaseExceptionMapper: DatabaseExceptionMapper,
+  ) {}
 
   async findAll(filters: FindPatientCategoryQueryDto = {}): Promise<OffsetPaginatedResult<PatientCategoryResponseDto>> {
     const page = filters.page ?? 1;
@@ -34,18 +40,28 @@ export class PatientCategoryService {
 
   async create(dto: CreatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
     await this.ensureNameAvailable(dto.name);
-    return PatientCategoryMapper.toResponseDto(await this.repository.save(this.repository.create(dto)));
+    try {
+      return PatientCategoryMapper.toResponseDto(await this.repository.save(this.repository.create(dto)));
+    } catch (error: unknown) {
+      throw this.databaseExceptionMapper.fromTypeOrmError(error, PATIENT_CATEGORY_CONSTRAINT_MAP);
+    }
   }
 
   async update(id: number, dto: UpdatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
     const category = await this.findByIdOrThrow(id);
     if (dto.name && dto.name !== category.name) await this.ensureNameAvailable(dto.name, id);
-    return PatientCategoryMapper.toResponseDto(await this.repository.save(this.repository.merge(category, dto)));
+    try {
+      return PatientCategoryMapper.toResponseDto(await this.repository.save(this.repository.merge(category, dto)));
+    } catch (error: unknown) {
+      throw this.databaseExceptionMapper.fromTypeOrmError(error, PATIENT_CATEGORY_CONSTRAINT_MAP);
+    }
   }
 
   async remove(id: number): Promise<void> {
-    await this.findByIdOrThrow(id);
-    await this.repository.delete(id);
+    const category = await this.findByIdOrThrow(id);
+    if (category.status === PatientCategoryStatus.INACTIVE) return;
+    category.status = PatientCategoryStatus.INACTIVE;
+    await this.repository.save(category);
   }
 
   private async findByIdOrThrow(id: number): Promise<PatientCategory> {
