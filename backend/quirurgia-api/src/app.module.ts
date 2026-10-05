@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { createObserveModule } from '@nestjs/observe';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './common/module/config.module';
 import { DatabaseModule } from './common/module/database.module';
@@ -33,6 +33,8 @@ import { PrescriptionModule } from './module-prescription/prescription.module';
 import { OrderModule } from './module-order/order.module';
 import { PaymentMethodModule } from './module-payment-method/payment-method.module';
 import { PaymentModule } from './module-payment/payment.module';
+import { GlobalExceptionFilter } from './common/error/global-exception.filter';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -72,6 +74,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PaymentModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor }
+  ],
 })
 export class AppModule {}
