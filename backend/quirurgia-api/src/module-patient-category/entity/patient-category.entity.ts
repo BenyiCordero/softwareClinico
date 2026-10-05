@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { PatientCategoryStatus } from '../enum/patient-category-status.enum';
 
 @Entity('patient_category')
+@Index('UQ_patient_category_name', ['name'], { unique: true })
 export class PatientCategory {
   @PrimaryGeneratedColumn()
   patientCategoryId: number;

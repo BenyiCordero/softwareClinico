@@ -10,7 +10,7 @@ export class UpdateServiceCategoryDto {
   parentCategoryId?: number | null;
 
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @IsString()
   @Length(2, 100)
   name?: string;

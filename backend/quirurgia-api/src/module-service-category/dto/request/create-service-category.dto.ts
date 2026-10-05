@@ -8,7 +8,7 @@ export class CreateServiceCategoryDto {
   @Min(1)
   parentCategoryId?: number;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @IsString()
   @Length(2, 100)
   @IsNotEmpty()

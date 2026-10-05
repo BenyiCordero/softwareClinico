@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { PositionStatus } from '../enum/position-status.enum';
 
 @Entity('position')
+@Index('UQ_position_name', ['name'], { unique: true })
 export class Position {
   @PrimaryGeneratedColumn()
   positionId: number;
