@@ -1,10 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Branch } from '../../module-branch/entity/branch.entity';
 import { PatientCategory } from '../../module-patient-category/entity/patient-category.entity';
 import { PriceListStatus } from '../enum/price-list-status.enum';
 
 @Entity('price_lists')
+@Index('IDX_price_list_resolution', ['status', 'branch', 'patientCategory', 'validFrom', 'validUntil', 'priority'])
 export class PriceList {
   @PrimaryGeneratedColumn()
   priceListId: number;
