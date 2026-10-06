@@ -1,9 +1,10 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Branch } from '../../module-branch/entity/branch.entity';
 import { AreaStatus } from '../enum/area-status.enum';
 
 @Entity('area')
+@Index('UQ_area_branch_parent_name', ['branch', 'parentArea', 'name'], { unique: true })
 export class Area {
   @PrimaryGeneratedColumn()
   areaId: number;

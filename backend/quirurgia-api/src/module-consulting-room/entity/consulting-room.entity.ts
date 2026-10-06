@@ -1,10 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Area } from '../../module-area/entity/area.entity';
 import { Branch } from '../../module-branch/entity/branch.entity';
 import { ConsultingRoomStatus } from '../enum/consulting-room-status.enum';
 
 @Entity('consulting_room')
+@Index('UQ_consulting_room_branch_code', ['branch', 'code'], { unique: true })
 export class ConsultingRoom {
   @PrimaryGeneratedColumn()
   consultingRoomId: number;
