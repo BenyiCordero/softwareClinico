@@ -1,5 +1,4 @@
 import { Global, Module } from '@nestjs/common';
-import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Branch } from '../module-branch/entity/branch.entity';
 import { Permission } from '../module-permission/entity/permission.entity';
@@ -11,11 +10,12 @@ import { UserPermissionOverride } from './entity/user-permission-override.entity
 import { UserRole } from './entity/user-role.entity';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
+import { PassportModule } from '@nestjs/passport';
 
 @Global()
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    PassportModule.register({ defaultStrategy: 'jwt'}),
     TypeOrmModule.forFeature([User, UserRole, UserPermissionOverride, Person, Role, Branch, Permission]),
   ],
   controllers: [UserController],
