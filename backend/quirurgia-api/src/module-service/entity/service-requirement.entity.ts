@@ -1,10 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { RequirementLevel } from '../enum/requirement-level.enum';
 import { ServiceRequirementStatus } from '../enum/service-requirement-status.enum';
 import { Service } from './service.entity';
 
 @Entity('service_requirement')
+@Index('UQ_service_requirement_service_name', ['service', 'name'], { unique: true })
+@Index('UQ_service_requirement_service_sort_order', ['service', 'sortOrder'], { unique: true })
 export class ServiceRequirement {
   @PrimaryGeneratedColumn()
   serviceRequirementId: number;
