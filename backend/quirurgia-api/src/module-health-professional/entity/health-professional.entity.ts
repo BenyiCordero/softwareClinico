@@ -1,9 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Employee } from '../../module-employee/entity/employee.entity';
 import { HealthProfessionalStatus } from '../enum/health-professional-status.enum';
 
 @Entity('health_professional')
+@Index('UQ_health_professional_employee', ['employee'], { unique: true })
+@Index('UQ_health_professional_license', ['professionalLicense'], { unique: true })
 export class HealthProfessional {
   @PrimaryGeneratedColumn()
   healthProfessionalId: number;

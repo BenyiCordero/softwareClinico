@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Area } from '../../module-area/entity/area.entity';
 import { Branch } from '../../module-branch/entity/branch.entity';
@@ -8,6 +8,10 @@ import { EmployeeAssignmentStatus } from '../enum/employee-assignment-status.enu
 import { Employee } from './employee.entity';
 
 @Entity('employee_assignment')
+@Index('UQ_employee_assignment_primary_active', ['employee'], {
+  unique: true,
+  where: `"assignment_type" = 'PRIMARY' AND "status" = 'ACTIVE'`,
+})
 export class EmployeeAssignment {
   @PrimaryGeneratedColumn()
   employeeAssignmentId: number;
