@@ -1,9 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Person } from '../../module-person/entity/person.entity';
 import { EmployeeStatus } from '../enum/employee-status.enum';
 
 @Entity('employee')
+@Index('UQ_employee_person', ['person'], { unique: true })
+@Index('UQ_employee_number', ['employeeNumber'], { unique: true })
 export class Employee {
   @PrimaryGeneratedColumn()
   employeeId: number;

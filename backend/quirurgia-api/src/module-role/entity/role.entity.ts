@@ -1,6 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { RoleStatus } from '../enum/role-status.enum';
 import { RoleType } from '../enum/role-type.enum';
+import { RolePermission } from './role-permission.entity';
 
 @Entity('role')
 export class Role {
@@ -8,6 +10,7 @@ export class Role {
   roleId: number;
 
   @Column({ name: 'name', type: 'varchar' })
+  @Index('UQ_role_name', { unique: true })
   name: string;
 
   @Column({ name: 'description', type: 'text' })
@@ -16,7 +19,7 @@ export class Role {
   @Column({ type: 'enum', enum: RoleType, name: 'type' })
   type: RoleType;
 
-  @Column({ type: 'enum', enum: RoleStatus, name: 'status' })
+  @Column({ type: 'enum', enum: RoleStatus, name: 'status', default: RoleStatus.ACTIVE })
   status: RoleStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
@@ -24,4 +27,7 @@ export class Role {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.role)
+  rolePermissions: Relation<RolePermission>[];
 }

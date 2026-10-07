@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { SpecialtyStatus } from '../enum/specialty-status.enum';
 
 @Entity('specialty')
+@Index('UQ_specialty_name', ['name'], { unique: true })
 export class Specialty {
   @PrimaryGeneratedColumn()
   specialtyId: number;

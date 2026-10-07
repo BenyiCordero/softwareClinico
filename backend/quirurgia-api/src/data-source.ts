@@ -105,7 +105,7 @@ export const AppDataSource = new DataSource({
     Payment,
   ],
   migrations: [
-    'src/migrations/*.ts',
+    'src/common/database/migrations/postgres/*.ts',
   ],
   migrationsTableName: 'typeorm_migrations',
   synchronize: false,

@@ -1,7 +1,8 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { BranchStatus } from '../enum/branch-status.enum';
 
 @Entity('branch')
+@Index('UQ_branch_code', ['code'], { unique: true })
 export class Branch {
   @PrimaryGeneratedColumn()
   branchId: number;

@@ -12,7 +12,7 @@ export class PaymentMethod {
   @Column({ name: 'code', type: 'varchar' })
   code: string;
 
-  @Column({ name: 'status', type: 'enum', enum: PaymentMethodStatus })
+  @Column({ name: 'status', type: 'enum', enum: PaymentMethodStatus, default: PaymentMethodStatus.ACTIVE })
   status: PaymentMethodStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

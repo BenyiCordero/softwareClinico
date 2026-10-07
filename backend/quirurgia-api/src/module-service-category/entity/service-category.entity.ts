@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import type { Relation } from 'typeorm';
 import { ServiceCategoryStatus } from '../enum/service-category-status.enum';
 
 @Entity('service_category')
+@Index('UQ_service_category_parent_name', ['parentCategory', 'name'], { unique: true })
 export class ServiceCategory {
   @PrimaryGeneratedColumn()
   serviceCategoryId: number;
