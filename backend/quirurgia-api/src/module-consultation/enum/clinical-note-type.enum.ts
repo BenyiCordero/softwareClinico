@@ -1,0 +1,8 @@
+export enum ClinicalNoteType {
+  EVOLUTION = 'EVOLUTION',
+  INITIAL = 'INITIAL',
+  FOLLOW_UP = 'FOLLOW_UP',
+  PROCEDURE = 'PROCEDURE',
+  DISCHARGE = 'DISCHARGE',
+  OTHER = 'OTHER',
+}
