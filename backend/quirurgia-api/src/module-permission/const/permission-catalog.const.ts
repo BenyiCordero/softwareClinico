@@ -216,11 +216,11 @@ export const PERMISSION_CATALOG: Record<PermissionResource, readonly PermissionA
     PermissionAction.DEACTIVATE,
   ],
   [PermissionResource.AUDIT_LOGS]: [
-    PermissionAction.READ, 
+    PermissionAction.READ,
     PermissionAction.EXPORT
   ],
   [PermissionResource.SESSIONS]: [
-    PermissionAction.READ, 
+    PermissionAction.READ,
     PermissionAction.REVOKE_SESSION
   ],
 };

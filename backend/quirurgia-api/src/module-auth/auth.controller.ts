@@ -55,18 +55,22 @@ export class AuthController {
   }
 
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string) {
+    const secure = this.configService.getOrThrow<string>('COOKIE_SECURE') === 'true';
+    const accessMaxAge = Number(this.configService.getOrThrow<string>('COOKIE_ACCESS_MAX_AGE'));
+    const refreshMaxAge = Number(this.configService.getOrThrow<string>('COOKIE_REFRESH_MAX_AGE'));
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: this.configService.getOrThrow('COOKIE_SECURE'),
+      secure,
       sameSite: 'lax',
-      maxAge: this.configService.getOrThrow('COOKIE_ACCESS_MAX_AGE'),
+      maxAge: accessMaxAge,
       path: '/',
     });
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: this.configService.getOrThrow('COOKIE_SECURE'),
+      secure,
       sameSite: 'lax',
-      maxAge: this.configService.getOrThrow('COOKIE_REFRESH_MAX_AGE'),
+      maxAge: refreshMaxAge,
       path: '/',
     });
   }

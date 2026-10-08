@@ -18,7 +18,7 @@ export class RolePermissionService {
         private readonly roleService: RoleService,
         private readonly permissionService: PermissionService
     ) {}
-    
+
     async create(dto: CreateRolePermission): Promise<RolePermissionResponse> {
         const permission = await this.permissionService.findPermissionOrThrowById(dto.permissionId);
         const role = await this.roleService.findRoleOrThrowById(dto.roleId);

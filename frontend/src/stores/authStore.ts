@@ -1,27 +1,24 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import type { CurrentUser } from '@/features/auth/auth.types'
+
+export type AuthStatus = 'loading' | 'authenticated' | 'anonymous'
 
 interface AuthState {
-  token: string | null
-  username: string | null
-  displayName: string | null
-  role: string | null
-  login: (payload: { token: string; username: string; displayName: string; role: string }) => void
-  logout: () => void
+  user: CurrentUser | null
+  status: AuthStatus
+  error: string | null
+  setLoading: () => void
+  setAuthenticated: (user: CurrentUser) => void
+  setAnonymous: (error?: string | null) => void
+  clearSession: () => void
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      token: null,
-      username: null,
-      displayName: null,
-      role: null,
-      login: ({ token, username, displayName, role }) => set({ token, username, displayName, role }),
-      logout: () => set({ token: null, username: null, displayName: null, role: null }),
-    }),
-    {
-      name: 'quirurgia-auth',
-    },
-  ),
-)
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  status: 'loading',
+  error: null,
+  setLoading: () => set({ status: 'loading', error: null }),
+  setAuthenticated: (user) => set({ user, status: 'authenticated', error: null }),
+  setAnonymous: (error = null) => set({ user: null, status: 'anonymous', error }),
+  clearSession: () => set({ user: null, status: 'anonymous', error: null }),
+}))

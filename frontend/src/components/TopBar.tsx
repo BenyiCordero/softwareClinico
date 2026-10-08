@@ -1,7 +1,8 @@
 import { HeartPulse, LogOut, Menu, RotateCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar, Button } from '@/components/ui'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '@/app/providers/auth-context'
+import { useBranch } from '@/app/providers/branch-context'
 
 interface TopBarProps {
   onToggleSidebar: () => void
@@ -9,11 +10,11 @@ interface TopBarProps {
 
 export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate()
-  const displayName = useAuthStore((s) => s.displayName)
-  const logout = useAuthStore((s) => s.logout)
+  const { displayName, logout } = useAuth()
+  const { branches, activeBranchId, isLoading: branchesLoading, setActiveBranchId } = useBranch()
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login', { replace: true })
   }
 
@@ -53,6 +54,28 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
             {displayName ?? 'Usuario'}
           </span>
         </div>
+        {branches.length > 0 && (
+          <label className="branch-selector-label" htmlFor="active-branch">
+            <span className="sr-only">Sucursal activa</span>
+            <select
+              id="active-branch"
+              className="branch-selector"
+              value={activeBranchId ?? ''}
+              disabled={branchesLoading}
+              onChange={(event) => {
+                const value = event.target.value
+                setActiveBranchId(value ? Number(value) : null)
+              }}
+            >
+              <option value="">Todas las sucursales</option>
+              {branches.map((branch) => (
+                <option key={branch.branchId} value={branch.branchId}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <Avatar name={displayName ?? 'Usuario'} />
         <Button
           variant="outline"

@@ -2,30 +2,32 @@ import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff, HeartPulse, Lock, User } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Field, Input } from '@/components/ui'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuth } from '@/app/providers/auth-context'
+import { isApiError } from '@/infrastructure/http'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const login = useAuthStore((s) => s.login)
+  const { login } = useAuth()
 
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    setError(null)
     setLoading(true)
-    // Mock auth: will be connected to the backend in a later stage.
-    setTimeout(() => {
-      login({
-        token: 'mock-token',
-        username,
-        displayName: username || 'Administrador',
-        role: 'ADMINISTRADOR',
-      })
+    try {
+      await login({ email, password })
       navigate('/dashboard', { replace: true })
-    }, 600)
+    } catch (loginError) {
+      if (isApiError(loginError)) setError(loginError.messages[0])
+      else setError('No fue posible iniciar sesión. Intenta nuevamente.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -51,15 +53,15 @@ export default function LoginPage() {
           </div>
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-3">
-              <Field label="Usuario" htmlFor="username">
+              <Field label="Correo electrónico" htmlFor="email">
                 <Input
-                  type="text"
-                  id="username"
-                  placeholder="Tu usuario"
+                  type="email"
+                  id="email"
+                  placeholder="correo@ejemplo.com"
                   required
-                  autoComplete="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   leading={<User className="h-4 w-4" />}
                 />
               </Field>
@@ -92,6 +94,11 @@ export default function LoginPage() {
                 </div>
               </Field>
             </div>
+            {error && (
+              <div role="alert" className="mb-4 rounded-lg border border-danger/20 bg-danger-light px-3 py-2 text-sm text-danger">
+                {error}
+              </div>
+            )}
             <Button
               type="submit"
               variant="primary"

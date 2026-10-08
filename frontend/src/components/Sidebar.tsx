@@ -1,6 +1,7 @@
 import { useState, type MouseEvent } from 'react'
 import { ChevronRight, HeartPulse } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useBranch } from '@/app/providers/branch-context'
 import { sidebarConfig, type SidebarItem } from '@/config/sidebar'
 
 interface SidebarProps {
@@ -13,6 +14,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const { pathname } = useLocation()
   const [prevPathname, setPrevPathname] = useState(pathname)
   const [openOverride, setOpenOverride] = useState<Record<string, boolean>>({})
+  const { can } = useBranch()
 
   // On navigation, drop manual overrides so auto-open applies again.
   if (prevPathname !== pathname) {
@@ -39,6 +41,12 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     }
   }
 
+  const canRender = (item: SidebarItem): boolean => {
+    const ownPermission = can(item.permissions, item.permissionMode)
+    if (!item.items?.length) return ownPermission
+    return ownPermission && item.items.some(canRender)
+  }
+
   return (
     <>
       <aside id="sidebar" className={open ? 'sidebar-open' : ''}>
@@ -54,7 +62,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
         <nav className="sidebar-nav" id="sidebar-nav">
           <ul className="sidebar-menu">
-            {sidebarConfig.map((item) => {
+            {sidebarConfig.filter(canRender).map((item) => {
               const ItemIcon = item.icon
               return item.items && item.items.length ? (
                 <li key={item.id}>
@@ -72,7 +80,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                     <span>{item.label}</span>
                   </a>
                   <ul className={`sidebar-submenu ${isOpen(item) ? 'open' : ''}`}>
-                    {item.items.map((sub) => {
+                    {item.items.filter(canRender).map((sub) => {
                       const SubIcon = sub.icon
                       return (
                         <li key={sub.path}>
