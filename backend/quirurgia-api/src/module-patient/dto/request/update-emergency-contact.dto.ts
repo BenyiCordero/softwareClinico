@@ -28,7 +28,9 @@ export class UpdateEmergencyContactDto {
   secondaryPhone?: string | null;
 
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsEmail()
   @Length(5, 254)
   email?: string | null;

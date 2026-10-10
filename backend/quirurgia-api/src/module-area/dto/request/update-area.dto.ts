@@ -1,5 +1,13 @@
 import { Transform, Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Length, Min, ValidateIf } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+  ValidateIf,
+} from 'class-validator';
 import { AreaStatus } from '../../enum/area-status.enum';
 
 export class UpdateAreaDto {
@@ -16,7 +24,9 @@ export class UpdateAreaDto {
   parentAreaId?: number | null;
 
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   name?: string;

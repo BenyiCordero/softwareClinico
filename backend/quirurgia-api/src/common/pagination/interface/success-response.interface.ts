@@ -1,4 +1,4 @@
-import { PaginationDto } from "../type/pagination.type";
+import { PaginationDto } from '../type/pagination.type';
 
 export interface SuccessResponse<T> {
   success: true;

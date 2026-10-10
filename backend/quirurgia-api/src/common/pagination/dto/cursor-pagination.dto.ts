@@ -1,4 +1,4 @@
-import { PaginationEnum } from "../enum/pagination.enum";
+import { PaginationEnum } from '../enum/pagination.enum';
 
 export class CursorPaginationDto {
   type!: PaginationEnum.CURSOR;

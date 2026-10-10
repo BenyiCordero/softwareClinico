@@ -15,8 +15,16 @@ import { PassportModule } from '@nestjs/passport';
 @Global()
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt'}),
-    TypeOrmModule.forFeature([User, UserRole, UserPermissionOverride, Person, Role, Branch, Permission]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    TypeOrmModule.forFeature([
+      User,
+      UserRole,
+      UserPermissionOverride,
+      Person,
+      Role,
+      Branch,
+      Permission,
+    ]),
   ],
   controllers: [UserController],
   providers: [UserService, AuthorizationService],

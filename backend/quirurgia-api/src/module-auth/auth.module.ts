@@ -17,19 +17,14 @@ import { UserModule } from '../module-user/user.module';
   imports: [
     PassportModule,
     UserModule,
-    TypeOrmModule.forFeature([
-      AuthSession,
-    ]),
+    TypeOrmModule.forFeature([AuthSession]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET')!,
         signOptions: {
-          expiresIn:
-            config.get<string>(
-              'JWT_EXPIRATION',
-            ) as StringValue,
+          expiresIn: config.get<string>('JWT_EXPIRATION') as StringValue,
         },
       }),
     }),
@@ -39,15 +34,9 @@ import { UserModule } from '../module-user/user.module';
     AuthSessionService,
     TokenService,
     JwtStrategy,
-    UserAuthListener
+    UserAuthListener,
   ],
-  controllers: [
-    AuthController
-  ],
-  exports: [
-    JwtModule,
-    PassportModule,
-    AuthSessionService
-  ],
+  controllers: [AuthController],
+  exports: [JwtModule, PassportModule, AuthSessionService],
 })
 export class AuthModule {}

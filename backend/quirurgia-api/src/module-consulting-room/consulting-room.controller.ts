@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -16,19 +28,25 @@ export class ConsultingRoomController {
 
   @RequirePermissions('consulting-rooms.read')
   @Get()
-  findAll(@Query() query?: FindConsultingRoomQueryDto): Promise<OffsetPaginatedResult<ConsultingRoomResponseDto>> {
+  findAll(
+    @Query() query?: FindConsultingRoomQueryDto,
+  ): Promise<OffsetPaginatedResult<ConsultingRoomResponseDto>> {
     return this.consultingRoomService.findAll(query);
   }
 
   @RequirePermissions('consulting-rooms.read')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<ConsultingRoomResponseDto> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ConsultingRoomResponseDto> {
     return this.consultingRoomService.findOne(id);
   }
 
   @RequirePermissions('consulting-rooms.create')
   @Post()
-  create(@Body() dto: CreateConsultingRoomDto): Promise<ConsultingRoomResponseDto> {
+  create(
+    @Body() dto: CreateConsultingRoomDto,
+  ): Promise<ConsultingRoomResponseDto> {
     return this.consultingRoomService.create(dto);
   }
 

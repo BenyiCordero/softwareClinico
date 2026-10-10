@@ -1,4 +1,13 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Branch } from '../../module-branch/entity/branch.entity';
 import { Patient } from '../../module-patient/entity/patient.entity';
@@ -7,7 +16,14 @@ import { User } from '../../module-user/entity/user.entity';
 import { SpecialPriceStatus } from '../enum/special-price-status.enum';
 
 @Entity('patient_special_price')
-@Index('IDX_patient_special_price_resolution', ['patient', 'service', 'branch', 'status', 'validFrom', 'validUntil'])
+@Index('IDX_patient_special_price_resolution', [
+  'patient',
+  'service',
+  'branch',
+  'status',
+  'validFrom',
+  'validUntil',
+])
 export class PatientSpecialPrice {
   @PrimaryGeneratedColumn()
   patientSpecialPriceId: number;

@@ -1,4 +1,4 @@
-import { SessionRevocationReason } from "./session-revocation-reason.interface";
+import { SessionRevocationReason } from './session-revocation-reason.interface';
 
 export interface SessionRevokedPayload {
   sid: string;

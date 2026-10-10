@@ -6,19 +6,9 @@ import { DatabaseModule } from '../common/module/database.module';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Permission,
-    ]),
-    DatabaseModule,
-  ],
-  providers: [
-    PermissionService,
-    DatabaseExceptionMapper,
-  ],
+  imports: [TypeOrmModule.forFeature([Permission]), DatabaseModule],
+  providers: [PermissionService, DatabaseExceptionMapper],
   controllers: [],
-  exports: [
-    PermissionService
-  ],
+  exports: [PermissionService],
 })
 export class PermissionModule {}

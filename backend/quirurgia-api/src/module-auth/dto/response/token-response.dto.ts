@@ -1,5 +1,5 @@
 export class TokenResponseDto {
-    accessToken!: string;
+  accessToken!: string;
 
-    refreshToken!: string;
+  refreshToken!: string;
 }

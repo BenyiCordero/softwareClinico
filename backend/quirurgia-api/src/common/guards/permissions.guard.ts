@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { PERMISSIONS_KEY } from '../decorator/require-permissions.decorator';
@@ -12,10 +17,10 @@ export class PermissionsGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const required = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const required = this.reflector.getAllAndOverride<string[]>(
+      PERMISSIONS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!required?.length) return true;
 
     const request = context.switchToHttp().getRequest<Request>();
@@ -23,7 +28,11 @@ export class PermissionsGuard implements CanActivate {
     if (!user) return false;
 
     const branchId = this.getBranchId(request);
-    const allowed = await this.authorizationService.hasAllPermissions(user.userId, required, branchId);
+    const allowed = await this.authorizationService.hasAllPermissions(
+      user.userId,
+      required,
+      branchId,
+    );
     if (!allowed) throw new ForbiddenException('Missing required permission');
     return true;
   }

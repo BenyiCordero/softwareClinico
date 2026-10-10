@@ -35,7 +35,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       const status: number = exception.getStatus();
-      const res: string | HttpExceptionResponse = exception.getResponse() as string | HttpExceptionResponse;
+      const res: string | HttpExceptionResponse = exception.getResponse() as
+        string | HttpExceptionResponse;
 
       if (status >= 500) {
         this.logger.error(

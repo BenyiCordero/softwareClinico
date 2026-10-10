@@ -1,28 +1,44 @@
 import { Transform } from 'class-transformer';
-import { IsDateString, IsEmail, IsEnum, IsOptional, IsString, Length, ValidateIf } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  Length,
+  ValidateIf,
+} from 'class-validator';
 import { Sex } from '../../enum/sex.enum';
 
 export class UpdatePersonDto {
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   firstName?: string;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   middleName?: string | null;
 
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   lastName?: string;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   secondLastName?: string | null;
@@ -36,13 +52,17 @@ export class UpdatePersonDto {
   sex?: Sex;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() : value,
+  )
   @IsString()
   @Length(18, 18)
   curp?: string | null;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toUpperCase() : value,
+  )
   @IsString()
   @Length(12, 13)
   rfc?: string | null;
@@ -60,7 +80,9 @@ export class UpdatePersonDto {
   secondaryPhone?: string | null;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsEmail()
   @Length(5, 254)
   email?: string | null;
@@ -72,13 +94,17 @@ export class UpdatePersonDto {
   address?: string | null;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   city?: string | null;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   state?: string | null;

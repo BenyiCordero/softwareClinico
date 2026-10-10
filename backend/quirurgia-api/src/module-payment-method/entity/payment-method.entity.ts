@@ -1,4 +1,10 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { PaymentMethodStatus } from '../enum/payment-method-status.enum';
 
 @Entity('payment_method')
@@ -12,7 +18,12 @@ export class PaymentMethod {
   @Column({ name: 'code', type: 'varchar' })
   code: string;
 
-  @Column({ name: 'status', type: 'enum', enum: PaymentMethodStatus, default: PaymentMethodStatus.ACTIVE })
+  @Column({
+    name: 'status',
+    type: 'enum',
+    enum: PaymentMethodStatus,
+    default: PaymentMethodStatus.ACTIVE,
+  })
   status: PaymentMethodStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

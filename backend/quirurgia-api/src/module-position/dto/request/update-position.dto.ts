@@ -4,7 +4,9 @@ import { PositionStatus } from '../../enum/position-status.enum';
 
 export class UpdatePositionDto {
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   name?: string;

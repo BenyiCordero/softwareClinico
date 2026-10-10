@@ -10,9 +10,7 @@ import { BranchService } from './branch.service';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     DatabaseModule,
-    TypeOrmModule.forFeature([
-      Branch,
-    ]),
+    TypeOrmModule.forFeature([Branch]),
   ],
   providers: [BranchService],
   controllers: [BranchController],

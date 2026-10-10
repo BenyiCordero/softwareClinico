@@ -10,21 +10,12 @@ import { DatabaseModule } from '../common/module/database.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Role,
-      RolePermission,
-    ]),
+    TypeOrmModule.forFeature([Role, RolePermission]),
     PermissionModule,
-    DatabaseModule
+    DatabaseModule,
   ],
-  providers: [
-    RoleService,
-    RolePermissionService,
-    DatabaseExceptionMapper,
-  ],
+  providers: [RoleService, RolePermissionService, DatabaseExceptionMapper],
   controllers: [],
-  exports: [
-    RolePermissionService
-  ],
+  exports: [RolePermissionService],
 })
 export class RoleModule {}

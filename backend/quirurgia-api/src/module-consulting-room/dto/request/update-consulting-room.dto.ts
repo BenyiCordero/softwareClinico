@@ -1,5 +1,13 @@
 import { Transform, Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Length, Min, ValidateIf } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+  ValidateIf,
+} from 'class-validator';
 import { ConsultingRoomStatus } from '../../enum/consulting-room-status.enum';
 
 export class UpdateConsultingRoomDto {
@@ -16,13 +24,17 @@ export class UpdateConsultingRoomDto {
   areaId?: number | null;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 50)
   code?: string;
 
   @ValidateIf((_, value) => value !== null)
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   name?: string;

@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -59,14 +64,18 @@ export class UserService {
     this.logger.setContext(UserService.name);
   }
 
-  async findAll(filters: FindUserQueryDto = {}): Promise<OffsetPaginatedResult<UserResponseDto>> {
+  async findAll(
+    filters: FindUserQueryDto = {},
+  ): Promise<OffsetPaginatedResult<UserResponseDto>> {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 100;
     const query = this.userQuery()
       .orderBy('user.createdAt', 'ASC')
       .addOrderBy('user.userId', 'ASC');
-    if (filters.status) query.andWhere('user.status = :status', { status: filters.status });
-    if (filters.roleId) query.andWhere('userRole.role_id = :roleId', { roleId: filters.roleId });
+    if (filters.status)
+      query.andWhere('user.status = :status', { status: filters.status });
+    if (filters.roleId)
+      query.andWhere('userRole.role_id = :roleId', { roleId: filters.roleId });
     const [entities, totalItems] = await query
       .skip((page - 1) * limit)
       .take(limit)
@@ -99,18 +108,27 @@ export class UserService {
       const branches = manager.getRepository(Branch);
       const userRoles = manager.getRepository(UserRole);
 
-      const [existingEmail, existingUsername, person, role, branch] = await Promise.all([
-        users.findOneBy({ email: dto.email }),
-        users.findOneBy({ username: dto.username }),
-        persons.findOneBy({ personId: dto.personId }),
-        roles.findOneBy({ roleId: dto.roleId, status: RoleStatus.ACTIVE }),
-        dto.branchId ? branches.findOneBy({ branchId: dto.branchId }) : Promise.resolve(null),
-      ]);
+      const [existingEmail, existingUsername, person, role, branch] =
+        await Promise.all([
+          users.findOneBy({ email: dto.email }),
+          users.findOneBy({ username: dto.username }),
+          persons.findOneBy({ personId: dto.personId }),
+          roles.findOneBy({ roleId: dto.roleId, status: RoleStatus.ACTIVE }),
+          dto.branchId
+            ? branches.findOneBy({ branchId: dto.branchId })
+            : Promise.resolve(null),
+        ]);
       if (existingEmail) throw new EmailAlreadyInUseException(dto.email);
-      if (existingUsername) throw new ConflictException('Username is already taken');
-      if (!person) throw new NotFoundException(`Person with id ${dto.personId} not found`);
-      if (!role) throw new NotFoundException(`Active role with id ${dto.roleId} not found`);
-      if (dto.branchId && !branch) throw new NotFoundException(`Branch with id ${dto.branchId} not found`);
+      if (existingUsername)
+        throw new ConflictException('Username is already taken');
+      if (!person)
+        throw new NotFoundException(`Person with id ${dto.personId} not found`);
+      if (!role)
+        throw new NotFoundException(
+          `Active role with id ${dto.roleId} not found`,
+        );
+      if (dto.branchId && !branch)
+        throw new NotFoundException(`Branch with id ${dto.branchId} not found`);
 
       const created = await users.save(
         users.create({
@@ -140,30 +158,44 @@ export class UserService {
 
   async update(id: number, dto: UserUpdateDto): Promise<UserResponseDto> {
     const user = await this.findUserOrThrowById(id);
-    if (!user.person) throw new BadRequestException('This user is not linked to a person');
+    if (!user.person)
+      throw new BadRequestException('This user is not linked to a person');
     const changed =
-      (dto.firstName !== undefined && user.person.firstName !== dto.firstName) ||
-      (dto.middleName !== undefined && user.person.middleName !== dto.middleName) ||
+      (dto.firstName !== undefined &&
+        user.person.firstName !== dto.firstName) ||
+      (dto.middleName !== undefined &&
+        user.person.middleName !== dto.middleName) ||
       (dto.lastName !== undefined && user.person.lastName !== dto.lastName);
     if (!changed) return UserMapper.toResponseDto(user);
-    await this.personRepository.save(this.personRepository.merge(user.person, dto));
+    await this.personRepository.save(
+      this.personRepository.merge(user.person, dto),
+    );
     return this.findOne(id);
   }
 
-  async changeStatus(id: number, dto: ChangeStatusDto, requesterId: number): Promise<UserResponseDto> {
+  async changeStatus(
+    id: number,
+    dto: ChangeStatusDto,
+    requesterId: number,
+  ): Promise<UserResponseDto> {
     if (id === requesterId) throw new SelfDisableForbiddenException();
     const user = await this.findUserOrThrowById(id);
     if (user.status === dto.status) return UserMapper.toResponseDto(user);
     user.status = dto.status;
     await this.userRepository.save(user);
     this.eventEmitter.emit(
-      dto.status === UserStatus.DISABLED ? 'user.disabled' : 'user.authorizationChanged',
+      dto.status === UserStatus.DISABLED
+        ? 'user.disabled'
+        : 'user.authorizationChanged',
       user.userId,
     );
     return this.findOne(id);
   }
 
-  async changePassword(id: number, dto: ChangePasswordDto): Promise<UserResponseDto> {
+  async changePassword(
+    id: number,
+    dto: ChangePasswordDto,
+  ): Promise<UserResponseDto> {
     const user = await this.findUserOrThrowById(id);
     user.passwordHash = await bcrypt.hash(dto.newPassword, this.saltRounds());
     await this.userRepository.save(user);
@@ -171,28 +203,48 @@ export class UserService {
     return this.findOne(id);
   }
 
-  async assignRole(userId: number, dto: AssignUserRoleDto): Promise<UserResponseDto> {
+  async assignRole(
+    userId: number,
+    dto: AssignUserRoleDto,
+  ): Promise<UserResponseDto> {
     const validFrom = dto.validFrom ?? new Date();
     const validUntil = dto.validUntil ?? null;
     this.ensureDateRange(validFrom, validUntil);
     const [user, role, branch] = await Promise.all([
       this.findUserOrThrowById(userId),
-      this.roleRepository.findOneBy({ roleId: dto.roleId, status: RoleStatus.ACTIVE }),
-      dto.branchId ? this.branchRepository.findOneBy({ branchId: dto.branchId }) : Promise.resolve(null),
+      this.roleRepository.findOneBy({
+        roleId: dto.roleId,
+        status: RoleStatus.ACTIVE,
+      }),
+      dto.branchId
+        ? this.branchRepository.findOneBy({ branchId: dto.branchId })
+        : Promise.resolve(null),
     ]);
-    if (!role) throw new NotFoundException(`Active role with id ${dto.roleId} not found`);
-    if (dto.branchId && !branch) throw new NotFoundException(`Branch with id ${dto.branchId} not found`);
+    if (!role)
+      throw new NotFoundException(
+        `Active role with id ${dto.roleId} not found`,
+      );
+    if (dto.branchId && !branch)
+      throw new NotFoundException(`Branch with id ${dto.branchId} not found`);
 
     const duplicate = await this.userRoleRepository
       .createQueryBuilder('userRole')
       .where('userRole.user_id = :userId', { userId })
       .andWhere('userRole.role_id = :roleId', { roleId: dto.roleId })
-      .andWhere(dto.branchId ? 'userRole.branch_id = :branchId' : 'userRole.branch_id IS NULL', {
-        branchId: dto.branchId,
-      })
+      .andWhere(
+        dto.branchId
+          ? 'userRole.branch_id = :branchId'
+          : 'userRole.branch_id IS NULL',
+        {
+          branchId: dto.branchId,
+        },
+      )
       .andWhere('userRole.status = :status', { status: UserRoleStatus.ACTIVE })
       .getOne();
-    if (duplicate) throw new ConflictException('The user already has this active role in this scope');
+    if (duplicate)
+      throw new ConflictException(
+        'The user already has this active role in this scope',
+      );
 
     await this.userRoleRepository.save(
       this.userRoleRepository.create({
@@ -212,7 +264,10 @@ export class UserService {
     const userRole = await this.userRoleRepository.findOne({
       where: { userRoleId, user: { userId } },
     });
-    if (!userRole) throw new NotFoundException(`Role assignment with id ${userRoleId} not found`);
+    if (!userRole)
+      throw new NotFoundException(
+        `Role assignment with id ${userRoleId} not found`,
+      );
     if (userRole.status !== UserRoleStatus.REVOKED) {
       userRole.status = UserRoleStatus.REVOKED;
       await this.userRoleRepository.save(userRole);
@@ -230,22 +285,43 @@ export class UserService {
     this.ensureDateRange(validFrom, validUntil);
     const [user, permission, branch] = await Promise.all([
       this.findUserOrThrowById(userId),
-      this.permissionRepository.findOneBy({ permissionId: dto.permissionId, status: PermissionStatus.ACTIVE }),
-      dto.branchId ? this.branchRepository.findOneBy({ branchId: dto.branchId }) : Promise.resolve(null),
+      this.permissionRepository.findOneBy({
+        permissionId: dto.permissionId,
+        status: PermissionStatus.ACTIVE,
+      }),
+      dto.branchId
+        ? this.branchRepository.findOneBy({ branchId: dto.branchId })
+        : Promise.resolve(null),
     ]);
-    if (!permission) throw new NotFoundException(`Active permission with id ${dto.permissionId} not found`);
-    if (dto.branchId && !branch) throw new NotFoundException(`Branch with id ${dto.branchId} not found`);
+    if (!permission)
+      throw new NotFoundException(
+        `Active permission with id ${dto.permissionId} not found`,
+      );
+    if (dto.branchId && !branch)
+      throw new NotFoundException(`Branch with id ${dto.branchId} not found`);
 
     const existing = await this.overrideRepository
       .createQueryBuilder('override')
       .where('override.user_id = :userId', { userId })
-      .andWhere('override.permission_id = :permissionId', { permissionId: dto.permissionId })
-      .andWhere(dto.branchId ? 'override.branch_id = :branchId' : 'override.branch_id IS NULL', {
-        branchId: dto.branchId,
+      .andWhere('override.permission_id = :permissionId', {
+        permissionId: dto.permissionId,
       })
-      .andWhere('override.status = :status', { status: PermissionOverrideStatus.ACTIVE })
+      .andWhere(
+        dto.branchId
+          ? 'override.branch_id = :branchId'
+          : 'override.branch_id IS NULL',
+        {
+          branchId: dto.branchId,
+        },
+      )
+      .andWhere('override.status = :status', {
+        status: PermissionOverrideStatus.ACTIVE,
+      })
       .getOne();
-    if (existing) throw new ConflictException('The user already has an active override for this permission');
+    if (existing)
+      throw new ConflictException(
+        'The user already has an active override for this permission',
+      );
 
     await this.overrideRepository.save(
       this.overrideRepository.create({
@@ -263,11 +339,17 @@ export class UserService {
     this.eventEmitter.emit('user.authorizationChanged', userId);
   }
 
-  async revokePermissionOverride(userId: number, overrideId: number): Promise<void> {
+  async revokePermissionOverride(
+    userId: number,
+    overrideId: number,
+  ): Promise<void> {
     const override = await this.overrideRepository.findOne({
       where: { userPermissionOverrideId: overrideId, user: { userId } },
     });
-    if (!override) throw new NotFoundException(`Permission override with id ${overrideId} not found`);
+    if (!override)
+      throw new NotFoundException(
+        `Permission override with id ${overrideId} not found`,
+      );
     if (override.status !== PermissionOverrideStatus.REVOKED) {
       override.status = PermissionOverrideStatus.REVOKED;
       await this.overrideRepository.save(override);
@@ -279,7 +361,10 @@ export class UserService {
     return this.userRepository.findOneBy({ email });
   }
 
-  async verifyPassword(password: string, passwordHash: string): Promise<boolean> {
+  async verifyPassword(
+    password: string,
+    passwordHash: string,
+  ): Promise<boolean> {
     return bcrypt.compare(password, passwordHash);
   }
 
@@ -288,7 +373,9 @@ export class UserService {
   }
 
   async findUserOrThrowById(id: number): Promise<User> {
-    const user = await this.userQuery().where('user.userId = :id', { id }).getOne();
+    const user = await this.userQuery()
+      .where('user.userId = :id', { id })
+      .getOne();
     if (!user) throw new UserNotFoundException(id);
     return user;
   }
@@ -307,7 +394,10 @@ export class UserService {
   }
 
   private ensureDateRange(validFrom: Date, validUntil: Date | null): void {
-    if (Number.isNaN(validFrom.valueOf()) || (validUntil !== null && Number.isNaN(validUntil.valueOf()))) {
+    if (
+      Number.isNaN(validFrom.valueOf()) ||
+      (validUntil !== null && Number.isNaN(validUntil.valueOf()))
+    ) {
       throw new BadRequestException('Invalid validity window');
     }
     if (validUntil !== null && validFrom >= validUntil) {

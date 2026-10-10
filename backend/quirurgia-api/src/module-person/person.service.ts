@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, EntityManager, Repository } from 'typeorm';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
@@ -19,7 +23,9 @@ export class PersonService {
     private readonly databaseExceptionMapper: DatabaseExceptionMapper,
   ) {}
 
-  async findAll(filters: FindPersonQueryDto = {}): Promise<OffsetPaginatedResult<PersonResponseDto>> {
+  async findAll(
+    filters: FindPersonQueryDto = {},
+  ): Promise<OffsetPaginatedResult<PersonResponseDto>> {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 100;
     const query = this.repository
@@ -28,22 +34,56 @@ export class PersonService {
       .orderBy('person.lastName', 'ASC')
       .addOrderBy('person.firstName', 'ASC');
     if (filters.name) {
-      query.andWhere(new Brackets((where) => {
-        where.where('person.firstName ILIKE :name', { name: `%${filters.name}%` })
-          .orWhere('person.middleName ILIKE :name', { name: `%${filters.name}%` })
-          .orWhere('person.lastName ILIKE :name', { name: `%${filters.name}%` })
-          .orWhere('person.secondLastName ILIKE :name', { name: `%${filters.name}%` });
-      }));
+      query.andWhere(
+        new Brackets((where) => {
+          where
+            .where('person.firstName ILIKE :name', {
+              name: `%${filters.name}%`,
+            })
+            .orWhere('person.middleName ILIKE :name', {
+              name: `%${filters.name}%`,
+            })
+            .orWhere('person.lastName ILIKE :name', {
+              name: `%${filters.name}%`,
+            })
+            .orWhere('person.secondLastName ILIKE :name', {
+              name: `%${filters.name}%`,
+            });
+        }),
+      );
     }
-    if (filters.curp) query.andWhere('person.curp = :curp', { curp: filters.curp.trim().toUpperCase() });
-    if (filters.rfc) query.andWhere('person.rfc = :rfc', { rfc: filters.rfc.trim().toUpperCase() });
-    if (filters.phone) query.andWhere('person.phone ILIKE :phone', { phone: `%${filters.phone}%` });
-    if (filters.email) query.andWhere('person.email ILIKE :email', { email: `%${filters.email}%` });
-    const [entities, totalItems] = await query.skip((page - 1) * limit).take(limit).getManyAndCount();
+    if (filters.curp)
+      query.andWhere('person.curp = :curp', {
+        curp: filters.curp.trim().toUpperCase(),
+      });
+    if (filters.rfc)
+      query.andWhere('person.rfc = :rfc', {
+        rfc: filters.rfc.trim().toUpperCase(),
+      });
+    if (filters.phone)
+      query.andWhere('person.phone ILIKE :phone', {
+        phone: `%${filters.phone}%`,
+      });
+    if (filters.email)
+      query.andWhere('person.email ILIKE :email', {
+        email: `%${filters.email}%`,
+      });
+    const [entities, totalItems] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
     const totalPages = Math.ceil(totalItems / limit);
     return {
       data: entities.map(PersonMapper.toResponseDto),
-      pagination: { type: PaginationEnum.OFFSET, page, limit, totalItems, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+      pagination: {
+        type: PaginationEnum.OFFSET,
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -70,18 +110,46 @@ export class PersonService {
       });
       return PersonMapper.toResponseDto(await this.repository.save(person));
     } catch (error: unknown) {
-      throw this.databaseExceptionMapper.fromTypeOrmError(error, PERSON_CONSTRAINT_MAP);
+      throw this.databaseExceptionMapper.fromTypeOrmError(
+        error,
+        PERSON_CONSTRAINT_MAP,
+      );
     }
   }
 
-  async createEntity(dto: CreatePersonDto, manager?: EntityManager): Promise<Person> {
+  async createEntity(
+    dto: CreatePersonDto,
+    manager?: EntityManager,
+  ): Promise<Person> {
     const repository = manager?.getRepository(Person) ?? this.repository;
-    await this.ensureIdentifiersAvailable(dto.curp ?? null, dto.rfc ?? null, undefined, repository);
-    const person = repository.create({ ...dto, middleName: dto.middleName ?? null, secondLastName: dto.secondLastName ?? null, curp: dto.curp ?? null, rfc: dto.rfc ?? null, secondaryPhone: dto.secondaryPhone ?? null, email: dto.email ?? null, address: dto.address ?? null, city: dto.city ?? null, state: dto.state ?? null, postalCode: dto.postalCode ?? null, deletedAt: null });
+    await this.ensureIdentifiersAvailable(
+      dto.curp ?? null,
+      dto.rfc ?? null,
+      undefined,
+      repository,
+    );
+    const person = repository.create({
+      ...dto,
+      middleName: dto.middleName ?? null,
+      secondLastName: dto.secondLastName ?? null,
+      curp: dto.curp ?? null,
+      rfc: dto.rfc ?? null,
+      secondaryPhone: dto.secondaryPhone ?? null,
+      email: dto.email ?? null,
+      address: dto.address ?? null,
+      city: dto.city ?? null,
+      state: dto.state ?? null,
+      postalCode: dto.postalCode ?? null,
+      deletedAt: null,
+    });
     return repository.save(person);
   }
 
-  async updateEntity(id: number, dto: UpdatePersonDto, manager?: EntityManager): Promise<Person> {
+  async updateEntity(
+    id: number,
+    dto: UpdatePersonDto,
+    manager?: EntityManager,
+  ): Promise<Person> {
     const repository = manager?.getRepository(Person) ?? this.repository;
     const person = await repository.findOneBy({ personId: id });
     if (!person) throw new NotFoundException(`Person with id ${id} not found`);
@@ -97,9 +165,14 @@ export class PersonService {
     const rfc = dto.rfc === undefined ? person.rfc : dto.rfc;
     await this.ensureIdentifiersAvailable(curp, rfc, id);
     try {
-      return PersonMapper.toResponseDto(await this.repository.save(this.repository.merge(person, dto)));
+      return PersonMapper.toResponseDto(
+        await this.repository.save(this.repository.merge(person, dto)),
+      );
     } catch (error: unknown) {
-      throw this.databaseExceptionMapper.fromTypeOrmError(error, PERSON_CONSTRAINT_MAP);
+      throw this.databaseExceptionMapper.fromTypeOrmError(
+        error,
+        PERSON_CONSTRAINT_MAP,
+      );
     }
   }
 
@@ -120,16 +193,29 @@ export class PersonService {
     return person;
   }
 
-  private async ensureIdentifiersAvailable(curp: string | null, rfc: string | null, excludeId?: number, repository: Repository<Person> = this.repository): Promise<void> {
+  private async ensureIdentifiersAvailable(
+    curp: string | null,
+    rfc: string | null,
+    excludeId?: number,
+    repository: Repository<Person> = this.repository,
+  ): Promise<void> {
     if (curp) {
-      const query = repository.createQueryBuilder('person').where('person.curp = :curp', { curp });
-      if (excludeId) query.andWhere('person.person_id != :excludeId', { excludeId });
-      if (await query.getExists()) throw new ConflictException(`Person curp ${curp} is already in use`);
+      const query = repository
+        .createQueryBuilder('person')
+        .where('person.curp = :curp', { curp });
+      if (excludeId)
+        query.andWhere('person.person_id != :excludeId', { excludeId });
+      if (await query.getExists())
+        throw new ConflictException(`Person curp ${curp} is already in use`);
     }
     if (rfc) {
-      const query = repository.createQueryBuilder('person').where('person.rfc = :rfc', { rfc });
-      if (excludeId) query.andWhere('person.person_id != :excludeId', { excludeId });
-      if (await query.getExists()) throw new ConflictException(`Person rfc ${rfc} is already in use`);
+      const query = repository
+        .createQueryBuilder('person')
+        .where('person.rfc = :rfc', { rfc });
+      if (excludeId)
+        query.andWhere('person.person_id != :excludeId', { excludeId });
+      if (await query.getExists())
+        throw new ConflictException(`Person rfc ${rfc} is already in use`);
     }
   }
 }

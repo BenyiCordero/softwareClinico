@@ -37,7 +37,9 @@ export class UserController {
 
   @RequirePermissions('users.read')
   @Get()
-  findAll(@Query() query: FindUserQueryDto): Promise<OffsetPaginatedResult<UserResponseDto>> {
+  findAll(
+    @Query() query: FindUserQueryDto,
+  ): Promise<OffsetPaginatedResult<UserResponseDto>> {
     return this.userService.findAll(query);
   }
 
@@ -62,7 +64,10 @@ export class UserController {
 
   @RequirePermissions('users.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UserUpdateDto): Promise<UserResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UserUpdateDto,
+  ): Promise<UserResponseDto> {
     return this.userService.update(id, dto);
   }
 
@@ -134,7 +139,10 @@ export class UserController {
     @Query('branchId') branchId?: string,
   ): Promise<string[]> {
     const parsedBranchId = branchId ? Number(branchId) : undefined;
-    const permissions = await this.authorizationService.getEffectivePermissions(id, parsedBranchId);
+    const permissions = await this.authorizationService.getEffectivePermissions(
+      id,
+      parsedBranchId,
+    );
     return [...permissions].sort();
   }
 }

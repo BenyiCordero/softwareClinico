@@ -1,4 +1,12 @@
-import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { RoleStatus } from '../enum/role-status.enum';
 import { RoleType } from '../enum/role-type.enum';
@@ -19,7 +27,12 @@ export class Role {
   @Column({ type: 'enum', enum: RoleType, name: 'type' })
   type: RoleType;
 
-  @Column({ type: 'enum', enum: RoleStatus, name: 'status', default: RoleStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: RoleStatus,
+    name: 'status',
+    default: RoleStatus.ACTIVE,
+  })
   status: RoleStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsDateString, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  Max,
+  Min,
+} from 'class-validator';
 import { SpecialPriceStatus } from '../../enum/special-price-status.enum';
 
 export class FindPatientSpecialPriceQueryDto {

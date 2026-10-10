@@ -1,3 +1,3 @@
 export enum RoleConstraintEnum {
-    NAME = 'UQ_role_name'
+  NAME = 'UQ_role_name',
 }

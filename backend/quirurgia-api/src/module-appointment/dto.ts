@@ -1,5 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsISO8601, IsOptional, IsString, Length, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsISO8601,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+} from 'class-validator';
 
 export class CreateAppointmentDto {
   @Type(() => Number) @IsInt() @Min(1) patientId: number;

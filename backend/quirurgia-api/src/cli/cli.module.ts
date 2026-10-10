@@ -19,7 +19,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     DatabaseModule,
     UserModule,
     PermissionModule,
-    RoleModule
+    RoleModule,
   ],
 })
 export class CliModule {}

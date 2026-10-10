@@ -1,4 +1,13 @@
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { User } from '../../module-user/entity/user.entity';
 
@@ -14,7 +23,10 @@ export class AuthSession {
   @Column({ name: 'current_jti', type: 'uuid' })
   currentJti!: string;
 
-  @Index('UQ_auth_session_active_user', { unique: true, where: '"revoked_at" IS NULL' })
+  @Index('UQ_auth_session_active_user', {
+    unique: true,
+    where: '"revoked_at" IS NULL',
+  })
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user!: Relation<User>;

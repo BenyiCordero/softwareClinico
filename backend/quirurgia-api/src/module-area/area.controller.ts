@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -16,7 +28,9 @@ export class AreaController {
 
   @RequirePermissions('areas.read')
   @Get()
-  findAll(@Query() query?: FindAreaQueryDto): Promise<OffsetPaginatedResult<AreaResponseDto>> {
+  findAll(
+    @Query() query?: FindAreaQueryDto,
+  ): Promise<OffsetPaginatedResult<AreaResponseDto>> {
     return this.areaService.findAll(query);
   }
 
@@ -34,7 +48,10 @@ export class AreaController {
 
   @RequirePermissions('areas.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAreaDto): Promise<AreaResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAreaDto,
+  ): Promise<AreaResponseDto> {
     return this.areaService.update(id, dto);
   }
 

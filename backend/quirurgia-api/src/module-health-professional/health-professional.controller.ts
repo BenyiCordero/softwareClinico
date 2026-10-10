@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -14,23 +26,31 @@ import { HealthProfessionalService } from './health-professional.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('health-professionals')
 export class HealthProfessionalController {
-  constructor(private readonly healthProfessionalService: HealthProfessionalService) {}
+  constructor(
+    private readonly healthProfessionalService: HealthProfessionalService,
+  ) {}
 
   @RequirePermissions('health-professionals.read')
   @Get()
-  findAll(@Query() query?: FindHealthProfessionalQueryDto): Promise<OffsetPaginatedResult<HealthProfessionalResponseDto>> {
+  findAll(
+    @Query() query?: FindHealthProfessionalQueryDto,
+  ): Promise<OffsetPaginatedResult<HealthProfessionalResponseDto>> {
     return this.healthProfessionalService.findAll(query);
   }
 
   @RequirePermissions('health-professionals.read')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<HealthProfessionalResponseDto> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<HealthProfessionalResponseDto> {
     return this.healthProfessionalService.findOne(id);
   }
 
   @RequirePermissions('health-professionals.create')
   @Post()
-  create(@Body() dto: CreateHealthProfessionalDto): Promise<HealthProfessionalResponseDto> {
+  create(
+    @Body() dto: CreateHealthProfessionalDto,
+  ): Promise<HealthProfessionalResponseDto> {
     return this.healthProfessionalService.create(dto);
   }
 
@@ -52,7 +72,9 @@ export class HealthProfessionalController {
 
   @RequirePermissions('health-professionals.read')
   @Get(':id/specialties')
-  findSpecialties(@Param('id', ParseIntPipe) id: number): Promise<ProfessionalSpecialtyResponseDto[]> {
+  findSpecialties(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ProfessionalSpecialtyResponseDto[]> {
     return this.healthProfessionalService.findSpecialties(id);
   }
 
@@ -70,8 +92,12 @@ export class HealthProfessionalController {
   @Delete(':id/specialties/:professionalSpecialtyId')
   removeSpecialty(
     @Param('id', ParseIntPipe) id: number,
-    @Param('professionalSpecialtyId', ParseIntPipe) professionalSpecialtyId: number,
+    @Param('professionalSpecialtyId', ParseIntPipe)
+    professionalSpecialtyId: number,
   ): Promise<void> {
-    return this.healthProfessionalService.removeSpecialty(id, professionalSpecialtyId);
+    return this.healthProfessionalService.removeSpecialty(
+      id,
+      professionalSpecialtyId,
+    );
   }
 }

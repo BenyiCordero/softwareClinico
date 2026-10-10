@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
@@ -20,18 +24,36 @@ export class BranchService {
     private readonly databaseExceptionMapper: DatabaseExceptionMapper,
   ) {}
 
-  async findAll(filters: FindBranchQueryDto = {}): Promise<OffsetPaginatedResult<BranchResponseDto>> {
+  async findAll(
+    filters: FindBranchQueryDto = {},
+  ): Promise<OffsetPaginatedResult<BranchResponseDto>> {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 100;
-    const query = this.repository.createQueryBuilder('branch').orderBy('branch.name', 'ASC');
-    if (filters.code) query.andWhere('branch.code ILIKE :code', { code: `%${filters.code}%` });
-    if (filters.name) query.andWhere('branch.name ILIKE :name', { name: `%${filters.name}%` });
-    if (filters.status) query.andWhere('branch.status = :status', { status: filters.status });
-    const [entities, totalItems] = await query.skip((page - 1) * limit).take(limit).getManyAndCount();
+    const query = this.repository
+      .createQueryBuilder('branch')
+      .orderBy('branch.name', 'ASC');
+    if (filters.code)
+      query.andWhere('branch.code ILIKE :code', { code: `%${filters.code}%` });
+    if (filters.name)
+      query.andWhere('branch.name ILIKE :name', { name: `%${filters.name}%` });
+    if (filters.status)
+      query.andWhere('branch.status = :status', { status: filters.status });
+    const [entities, totalItems] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
     const totalPages = Math.ceil(totalItems / limit);
     return {
       data: entities.map(BranchMapper.toResponseDto),
-      pagination: { type: PaginationEnum.OFFSET, page, limit, totalItems, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+      pagination: {
+        type: PaginationEnum.OFFSET,
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -42,19 +64,30 @@ export class BranchService {
   async create(dto: CreateBranchDto): Promise<BranchResponseDto> {
     await this.ensureCodeAvailable(dto.code);
     try {
-      return BranchMapper.toResponseDto(await this.repository.save(this.repository.create(dto)));
+      return BranchMapper.toResponseDto(
+        await this.repository.save(this.repository.create(dto)),
+      );
     } catch (error: unknown) {
-      throw this.databaseExceptionMapper.fromTypeOrmError(error, BRANCH_CONSTRAINT_MAP);
+      throw this.databaseExceptionMapper.fromTypeOrmError(
+        error,
+        BRANCH_CONSTRAINT_MAP,
+      );
     }
   }
 
   async update(id: number, dto: UpdateBranchDto): Promise<BranchResponseDto> {
     const branch = await this.findByIdOrThrow(id);
-    if (dto.code && dto.code !== branch.code) await this.ensureCodeAvailable(dto.code, id);
+    if (dto.code && dto.code !== branch.code)
+      await this.ensureCodeAvailable(dto.code, id);
     try {
-      return BranchMapper.toResponseDto(await this.repository.save(this.repository.merge(branch, dto)));
+      return BranchMapper.toResponseDto(
+        await this.repository.save(this.repository.merge(branch, dto)),
+      );
     } catch (error: unknown) {
-      throw this.databaseExceptionMapper.fromTypeOrmError(error, BRANCH_CONSTRAINT_MAP);
+      throw this.databaseExceptionMapper.fromTypeOrmError(
+        error,
+        BRANCH_CONSTRAINT_MAP,
+      );
     }
   }
 
@@ -71,9 +104,16 @@ export class BranchService {
     return branch;
   }
 
-  private async ensureCodeAvailable(code: string, excludeId?: number): Promise<void> {
-    const query = this.repository.createQueryBuilder('branch').where('branch.code = :code', { code });
-    if (excludeId) query.andWhere('branch.branch_id != :excludeId', { excludeId });
-    if (await query.getExists()) throw new ConflictException(`Branch code ${code} is already in use`);
+  private async ensureCodeAvailable(
+    code: string,
+    excludeId?: number,
+  ): Promise<void> {
+    const query = this.repository
+      .createQueryBuilder('branch')
+      .where('branch.code = :code', { code });
+    if (excludeId)
+      query.andWhere('branch.branch_id != :excludeId', { excludeId });
+    if (await query.getExists())
+      throw new ConflictException(`Branch code ${code} is already in use`);
   }
 }

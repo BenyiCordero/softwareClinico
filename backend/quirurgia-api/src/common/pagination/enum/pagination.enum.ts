@@ -1,4 +1,4 @@
 export enum PaginationEnum {
-    CURSOR = 'CURSOR',
-    OFFSET = 'OFFSET'
+  CURSOR = 'CURSOR',
+  OFFSET = 'OFFSET',
 }

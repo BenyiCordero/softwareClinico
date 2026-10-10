@@ -4,7 +4,9 @@ import { PatientResponseDto } from './response/patient-response.dto';
 import { PersonMapper } from '../../module-person/dto/person.mapper';
 
 export class PatientMapper {
-  static toContactResponse(contact: NonNullable<Patient['emergencyContacts']>[number]): EmergencyContactResponseDto {
+  static toContactResponse(
+    contact: NonNullable<Patient['emergencyContacts']>[number],
+  ): EmergencyContactResponseDto {
     return {
       emergencyContactId: contact.emergencyContactId,
       name: contact.name,
@@ -31,7 +33,9 @@ export class PatientMapper {
       updatedAt: patient.updatedAt,
       person: PersonMapper.toResponseDto(patient.person),
       patientCategory: patient.patientCategory,
-      emergencyContacts: (patient.emergencyContacts ?? []).map(PatientMapper.toContactResponse),
+      emergencyContacts: (patient.emergencyContacts ?? []).map(
+        PatientMapper.toContactResponse,
+      ),
     };
   }
 }

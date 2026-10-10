@@ -13,10 +13,7 @@ import { DatabaseModule } from '../common/module/database.module';
     PersonModule,
     PatientCategoryModule,
     DatabaseModule,
-    TypeOrmModule.forFeature([
-      Patient,
-      EmergencyContact,
-    ]),
+    TypeOrmModule.forFeature([Patient, EmergencyContact]),
   ],
   providers: [PatientService],
   controllers: [PatientController],

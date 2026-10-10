@@ -6,9 +6,7 @@ import { DatabaseExceptionMapper } from '../database/errors/database-exception.m
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      inject: [
-        ConfigService,
-      ],
+      inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.getOrThrow<string>('DB_HOST'),
@@ -21,12 +19,7 @@ import { DatabaseExceptionMapper } from '../database/errors/database-exception.m
       }),
     }),
   ],
-  providers: [
-    DatabaseExceptionMapper
-  ],
-  exports: [
-    TypeOrmModule,
-    DatabaseExceptionMapper
-  ],
+  providers: [DatabaseExceptionMapper],
+  exports: [TypeOrmModule, DatabaseExceptionMapper],
 })
 export class DatabaseModule {}

@@ -12,11 +12,7 @@ import { ConsultingRoomService } from './consulting-room.service';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     DatabaseModule,
-    TypeOrmModule.forFeature([
-      ConsultingRoom,
-      Branch,
-      Area,
-    ]),
+    TypeOrmModule.forFeature([ConsultingRoom, Branch, Area]),
   ],
   providers: [ConsultingRoomService],
   controllers: [ConsultingRoomController],

@@ -1,4 +1,12 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { User } from '../../module-user/entity/user.entity';
 import { ClinicalRecord } from './clinical-record.entity';
@@ -15,10 +23,18 @@ export class MedicalHistory {
   @Column({ name: 'family_history', type: 'text', nullable: true })
   familyHistory: string | null;
 
-  @Column({ name: 'personal_pathological_history', type: 'text', nullable: true })
+  @Column({
+    name: 'personal_pathological_history',
+    type: 'text',
+    nullable: true,
+  })
   personalPathologicalHistory: string | null;
 
-  @Column({ name: 'personal_non_pathological_history', type: 'text', nullable: true })
+  @Column({
+    name: 'personal_non_pathological_history',
+    type: 'text',
+    nullable: true,
+  })
   personalNonPathologicalHistory: string | null;
 
   @Column({ name: 'surgical_history', type: 'text', nullable: true })

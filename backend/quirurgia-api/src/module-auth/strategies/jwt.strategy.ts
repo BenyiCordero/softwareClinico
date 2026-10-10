@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UserService,
-    private readonly authSessionService: AuthSessionService
+    private readonly authSessionService: AuthSessionService,
   ) {
     const jwtSecret = configService.get<string>('JWT_SECRET');
     if (!jwtSecret) throw new Error('JWT_SECRET is not defined');
@@ -38,7 +38,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @throws UnauthorizedException if the user is missing or is not active
    */
   async validate(payload: AccessTokenPayload) {
-    const session: AuthSession | null = await this.authSessionService.findActiveSessionBySidOrNull(payload.sid);
+    const session: AuthSession | null =
+      await this.authSessionService.findActiveSessionBySidOrNull(payload.sid);
     if (!session) throw new UnauthorizedException();
     const user = await this.userService.findUserById(payload.sub);
     if (!user) throw new UnauthorizedException();

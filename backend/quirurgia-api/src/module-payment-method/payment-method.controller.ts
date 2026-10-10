@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -24,13 +36,17 @@ export class PaymentMethodController {
 
   @RequirePermissions('payment-methods.read')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<PaymentMethodResponseDto> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PaymentMethodResponseDto> {
     return this.paymentMethodService.findOne(id);
   }
 
   @RequirePermissions('payment-methods.create')
   @Post()
-  create(@Body() dto: CreatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
+  create(
+    @Body() dto: CreatePaymentMethodDto,
+  ): Promise<PaymentMethodResponseDto> {
     return this.paymentMethodService.create(dto);
   }
 
