@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -12,29 +24,40 @@ import { PatientCategoryService } from './patient-category.service';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('patient-categories')
 export class PatientCategoryController {
-  constructor(private readonly patientCategoryService: PatientCategoryService) {}
+  constructor(
+    private readonly patientCategoryService: PatientCategoryService,
+  ) {}
 
   @RequirePermissions('patient-categories.read')
   @Get()
-  findAll(@Query() query?: FindPatientCategoryQueryDto): Promise<OffsetPaginatedResult<PatientCategoryResponseDto>> {
+  findAll(
+    @Query() query?: FindPatientCategoryQueryDto,
+  ): Promise<OffsetPaginatedResult<PatientCategoryResponseDto>> {
     return this.patientCategoryService.findAll(query);
   }
 
   @RequirePermissions('patient-categories.read')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<PatientCategoryResponseDto> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PatientCategoryResponseDto> {
     return this.patientCategoryService.findOne(id);
   }
 
   @RequirePermissions('patient-categories.create')
   @Post()
-  create(@Body() dto: CreatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
+  create(
+    @Body() dto: CreatePatientCategoryDto,
+  ): Promise<PatientCategoryResponseDto> {
     return this.patientCategoryService.create(dto);
   }
 
   @RequirePermissions('patient-categories.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePatientCategoryDto,
+  ): Promise<PatientCategoryResponseDto> {
     return this.patientCategoryService.update(id, dto);
   }
 

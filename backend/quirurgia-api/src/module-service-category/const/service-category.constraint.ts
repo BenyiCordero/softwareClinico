@@ -7,5 +7,7 @@ export const SERVICE_CATEGORY_CONSTRAINT_MAP: Record<
   () => ServiceCategoryConflictException
 > = {
   [ServiceCategoryConstraintEnum.PARENT_NAME]: () =>
-    new ServiceCategoryConflictException(ServiceCategoryConflictReasonEnum.PARENT_NAME),
+    new ServiceCategoryConflictException(
+      ServiceCategoryConflictReasonEnum.PARENT_NAME,
+    ),
 };

@@ -8,14 +8,12 @@ import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
-    PassportModule.register({ defaultStrategy: 'jwt'}),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     DatabaseModule,
-    TypeOrmModule.forFeature([
-      PatientCategory,
-    ]),
+    TypeOrmModule.forFeature([PatientCategory]),
   ],
   providers: [PatientCategoryService],
   controllers: [PatientCategoryController],
-  exports: [],
+  exports: [PatientCategoryService],
 })
 export class PatientCategoryModule {}

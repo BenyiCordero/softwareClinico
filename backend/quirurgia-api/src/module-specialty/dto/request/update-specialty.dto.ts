@@ -4,7 +4,9 @@ import { SpecialtyStatus } from '../../enum/specialty-status.enum';
 
 export class UpdateSpecialtyDto {
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 100)
   name?: string;

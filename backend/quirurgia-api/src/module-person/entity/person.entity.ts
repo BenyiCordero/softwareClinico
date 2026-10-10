@@ -1,8 +1,18 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Sex } from '../enum/sex.enum';
 
 @Entity('person')
-@Index('UQ_person_curp', ['curp'], { unique: true, where: '"curp" IS NOT NULL' })
+@Index('UQ_person_curp', ['curp'], {
+  unique: true,
+  where: '"curp" IS NOT NULL',
+})
 @Index('UQ_person_rfc', ['rfc'], { unique: true, where: '"rfc" IS NOT NULL' })
 export class Person {
   @PrimaryGeneratedColumn()

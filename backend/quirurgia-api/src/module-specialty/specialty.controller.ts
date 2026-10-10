@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -16,13 +28,17 @@ export class SpecialtyController {
 
   @RequirePermissions('specialties.read')
   @Get()
-  findAll(@Query() query?: FindSpecialtyQueryDto): Promise<OffsetPaginatedResult<SpecialtyResponseDto>> {
+  findAll(
+    @Query() query?: FindSpecialtyQueryDto,
+  ): Promise<OffsetPaginatedResult<SpecialtyResponseDto>> {
     return this.specialtyService.findAll(query);
   }
 
   @RequirePermissions('specialties.read')
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<SpecialtyResponseDto> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<SpecialtyResponseDto> {
     return this.specialtyService.findOne(id);
   }
 
@@ -34,7 +50,10 @@ export class SpecialtyController {
 
   @RequirePermissions('specialties.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateSpecialtyDto): Promise<SpecialtyResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateSpecialtyDto,
+  ): Promise<SpecialtyResponseDto> {
     return this.specialtyService.update(id, dto);
   }
 

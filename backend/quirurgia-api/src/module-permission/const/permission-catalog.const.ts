@@ -2,7 +2,10 @@ import { PermissionAction } from '../enum/permission-action.enum';
 import { PermissionResource } from '../enum/permission-resource.enum';
 
 /** Valid permission actions by domain resource. Keep this explicit to prevent meaningless combinations. */
-export const PERMISSION_CATALOG: Record<PermissionResource, readonly PermissionAction[]> = {
+export const PERMISSION_CATALOG: Record<
+  PermissionResource,
+  readonly PermissionAction[]
+> = {
   [PermissionResource.USERS]: [
     PermissionAction.CREATE,
     PermissionAction.READ,
@@ -34,6 +37,7 @@ export const PERMISSION_CATALOG: Record<PermissionResource, readonly PermissionA
     PermissionAction.UPDATE,
     PermissionAction.ACTIVATE,
     PermissionAction.DEACTIVATE,
+    PermissionAction.ARCHIVE,
     PermissionAction.EXPORT,
   ],
   [PermissionResource.CLINICAL_RECORDS]: [
@@ -217,10 +221,10 @@ export const PERMISSION_CATALOG: Record<PermissionResource, readonly PermissionA
   ],
   [PermissionResource.AUDIT_LOGS]: [
     PermissionAction.READ,
-    PermissionAction.EXPORT
+    PermissionAction.EXPORT,
   ],
   [PermissionResource.SESSIONS]: [
     PermissionAction.READ,
-    PermissionAction.REVOKE_SESSION
+    PermissionAction.REVOKE_SESSION,
   ],
 };

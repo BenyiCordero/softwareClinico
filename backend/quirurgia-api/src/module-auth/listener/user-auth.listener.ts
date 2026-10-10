@@ -1,16 +1,18 @@
-import { Injectable } from "@nestjs/common";
-import { AuthSessionService } from "../auth-session.service";
-import { OnEvent } from "@nestjs/event-emitter";
-import { SessionRevocationReason } from "../interface/session-revocation-reason.interface";
+import { Injectable } from '@nestjs/common';
+import { AuthSessionService } from '../auth-session.service';
+import { OnEvent } from '@nestjs/event-emitter';
+import { SessionRevocationReason } from '../interface/session-revocation-reason.interface';
 
 @Injectable()
 export class UserAuthListener {
-  constructor(
-    private readonly authSessionService: AuthSessionService,
-  ) {}
+  constructor(private readonly authSessionService: AuthSessionService) {}
 
-  private async revokeActiveSession(userId: number, reason: SessionRevocationReason): Promise<void> {
-    const session = await this.authSessionService.findActiveSessionByUserIdOrNull(userId);
+  private async revokeActiveSession(
+    userId: number,
+    reason: SessionRevocationReason,
+  ): Promise<void> {
+    const session =
+      await this.authSessionService.findActiveSessionByUserIdOrNull(userId);
     if (!session) return;
     await this.authSessionService.revokeSession(session.sid, reason);
   }

@@ -21,7 +21,9 @@ import { UserRoleStatus } from '../../module-user/enum/user-role-status.enum';
 
 const ADMIN_ROLE_NAME = 'admin';
 
-const initialPermissions: CreatePermissionDto[] = Object.values(PermissionResource).flatMap((resource) =>
+const initialPermissions: CreatePermissionDto[] = Object.values(
+  PermissionResource,
+).flatMap((resource) =>
   PERMISSION_CATALOG[resource].map((action) => ({
     resource,
     action,
@@ -38,9 +40,7 @@ async function bootstrap() {
     const userService = app.get(UserService);
     const permissionService = app.get(PermissionService);
     const rolePermissionService = app.get(RolePermissionService);
-    const roleRepository = app.get<Repository<Role>>(
-      getRepositoryToken(Role),
-    );
+    const roleRepository = app.get<Repository<Role>>(getRepositoryToken(Role));
     const personRepository = app.get<Repository<Person>>(
       getRepositoryToken(Person),
     );
@@ -48,9 +48,14 @@ async function bootstrap() {
       getRepositoryToken(UserRole),
     );
 
-    const email = configService.get<string>('ADMIN_EMAIL')?.trim().toLowerCase();
+    const email = configService
+      .get<string>('ADMIN_EMAIL')
+      ?.trim()
+      .toLowerCase();
     const password = configService.get<string>('ADMIN_PASSWORD');
-    const username = configService.get<string>('ADMIN_USERNAME')?.trim().toLowerCase() ?? email?.split('@')[0];
+    const username =
+      configService.get<string>('ADMIN_USERNAME')?.trim().toLowerCase() ??
+      email?.split('@')[0];
     const firstName = configService.get<string>('ADMIN_FIRST_NAME');
     const lastName = configService.get<string>('ADMIN_LAST_NAME');
     const birthDate = configService.get<string>('ADMIN_BIRTH_DATE');
@@ -59,7 +64,16 @@ async function bootstrap() {
     const branchIdValue = configService.get<string>('ADMIN_BRANCH_ID');
     const branchId = branchIdValue ? Number(branchIdValue) : undefined;
 
-    if (!email || !password || !username || !firstName || !lastName || !birthDate || !sex || !phone) {
+    if (
+      !email ||
+      !password ||
+      !username ||
+      !firstName ||
+      !lastName ||
+      !birthDate ||
+      !sex ||
+      !phone
+    ) {
       throw new Error(
         'Missing admin environment variables: ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_FIRST_NAME, ADMIN_LAST_NAME, ADMIN_BIRTH_DATE, ADMIN_SEX, ADMIN_PHONE',
       );
@@ -79,7 +93,8 @@ async function bootstrap() {
       logger.info({ roleId: role.roleId }, 'Administrator role created');
     }
 
-    const permissions = await permissionService.createManyIfNotExists(initialPermissions);
+    const permissions =
+      await permissionService.createManyIfNotExists(initialPermissions);
 
     await rolePermissionService.createManyIfNotExists(
       role.roleId,
@@ -93,8 +108,15 @@ async function bootstrap() {
         .createQueryBuilder('userRole')
         .where('userRole.user_id = :userId', { userId: existingUser.userId })
         .andWhere('userRole.role_id = :roleId', { roleId: role.roleId })
-        .andWhere(branchId ? 'userRole.branch_id = :branchId' : 'userRole.branch_id IS NULL', { branchId })
-        .andWhere('userRole.status = :status', { status: UserRoleStatus.ACTIVE })
+        .andWhere(
+          branchId
+            ? 'userRole.branch_id = :branchId'
+            : 'userRole.branch_id IS NULL',
+          { branchId },
+        )
+        .andWhere('userRole.status = :status', {
+          status: UserRoleStatus.ACTIVE,
+        })
         .getOne();
 
       if (!adminRoleAssignment) {

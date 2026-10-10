@@ -1,5 +1,12 @@
 import { Transform, Type } from 'class-transformer';
-import { IsDateString, IsInt, IsNotEmpty, IsString, Length, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Length,
+  Min,
+} from 'class-validator';
 
 export class CreateEmployeeDto {
   @Type(() => Number)
@@ -7,7 +14,9 @@ export class CreateEmployeeDto {
   @Min(1)
   personId: number;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
   @IsString()
   @Length(2, 50)
   @IsNotEmpty()
@@ -15,5 +24,4 @@ export class CreateEmployeeDto {
 
   @IsDateString()
   hireDate: string;
-
 }

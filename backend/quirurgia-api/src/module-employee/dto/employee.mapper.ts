@@ -17,7 +17,9 @@ export class EmployeeMapper {
     };
   }
 
-  static toAssignmentResponseDto(assignment: EmployeeAssignment): EmployeeAssignmentResponseDto {
+  static toAssignmentResponseDto(
+    assignment: EmployeeAssignment,
+  ): EmployeeAssignmentResponseDto {
     return {
       employeeAssignmentId: assignment.employeeAssignmentId,
       branchId: assignment.branch.branchId,

@@ -4,7 +4,9 @@ import { HealthProfessionalResponseDto } from './response/health-professional-re
 import { ProfessionalSpecialtyResponseDto } from './response/professional-specialty-response.dto';
 
 export class HealthProfessionalMapper {
-  static toResponseDto(professional: HealthProfessional): HealthProfessionalResponseDto {
+  static toResponseDto(
+    professional: HealthProfessional,
+  ): HealthProfessionalResponseDto {
     return {
       healthProfessionalId: professional.healthProfessionalId,
       employeeId: professional.employee.employeeId,
@@ -17,7 +19,9 @@ export class HealthProfessionalMapper {
     };
   }
 
-  static toSpecialtyResponseDto(specialty: ProfessionalSpecialty): ProfessionalSpecialtyResponseDto {
+  static toSpecialtyResponseDto(
+    specialty: ProfessionalSpecialty,
+  ): ProfessionalSpecialtyResponseDto {
     return {
       professionalSpecialtyId: specialty.professionalSpecialityId,
       specialtyId: specialty.specialty.specialtyId,

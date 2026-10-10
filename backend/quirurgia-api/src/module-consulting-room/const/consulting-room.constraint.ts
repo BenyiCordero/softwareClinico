@@ -7,5 +7,7 @@ export const CONSULTING_ROOM_CONSTRAINT_MAP: Record<
   () => ConsultingRoomConflictException
 > = {
   [ConsultingRoomConstraintEnum.BRANCH_CODE]: () =>
-    new ConsultingRoomConflictException(ConsultingRoomConflictReasonEnum.BRANCH_CODE),
+    new ConsultingRoomConflictException(
+      ConsultingRoomConflictReasonEnum.BRANCH_CODE,
+    ),
 };

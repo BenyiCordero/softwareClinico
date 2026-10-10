@@ -7,23 +7,16 @@ import { RolePermissionService } from './role-permission.service';
 import { PermissionModule } from '../module-permission/permission.module';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 import { DatabaseModule } from '../common/module/database.module';
+import { RoleController } from './role.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Role,
-      RolePermission,
-    ]),
+    TypeOrmModule.forFeature([Role, RolePermission]),
     PermissionModule,
-    DatabaseModule
+    DatabaseModule,
   ],
-  providers: [
-    RoleService,
-    RolePermissionService
-  ],
-  controllers: [],
-  exports: [
-    RolePermissionService
-  ],
+  providers: [RoleService, RolePermissionService, DatabaseExceptionMapper],
+  controllers: [RoleController],
+  exports: [RolePermissionService],
 })
 export class RoleModule {}

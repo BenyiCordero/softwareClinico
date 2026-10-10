@@ -29,22 +29,32 @@ export class PaymentMethodService {
     const limit: number = filters?.limit ?? 100;
     const offset = (page - 1) * limit;
 
-    const query: SelectQueryBuilder<PaymentMethod> = this.paymentMethodRepository
-      .createQueryBuilder('paymentMethod')
-      .orderBy('paymentMethod.createdAt', 'ASC')
-      .addOrderBy('paymentMethod.paymentMethodId', 'ASC');
+    const query: SelectQueryBuilder<PaymentMethod> =
+      this.paymentMethodRepository
+        .createQueryBuilder('paymentMethod')
+        .orderBy('paymentMethod.createdAt', 'ASC')
+        .addOrderBy('paymentMethod.paymentMethodId', 'ASC');
 
     if (filters?.name) {
-      query.andWhere('paymentMethod.name ILIKE :name', { name: `%${filters.name}%` });
+      query.andWhere('paymentMethod.name ILIKE :name', {
+        name: `%${filters.name}%`,
+      });
     }
     if (filters?.code) {
-      query.andWhere('paymentMethod.code ILIKE :code', { code: `%${filters.code}%` });
+      query.andWhere('paymentMethod.code ILIKE :code', {
+        code: `%${filters.code}%`,
+      });
     }
     if (filters?.status) {
-      query.andWhere('paymentMethod.status = :status', { status: filters.status });
+      query.andWhere('paymentMethod.status = :status', {
+        status: filters.status,
+      });
     }
 
-    const [entities, totalItems] = await query.skip(offset).take(limit).getManyAndCount();
+    const [entities, totalItems] = await query
+      .skip(offset)
+      .take(limit)
+      .getManyAndCount();
     const totalPages = Math.ceil(totalItems / limit);
 
     return {
@@ -68,8 +78,13 @@ export class PaymentMethodService {
   async create(dto: CreatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
     const existing = await this.findByCodeOrNull(dto.code);
     if (existing) {
-      this.logger.debug({ code: dto.code }, 'Payment method creation rejected because code is already in use');
-      throw new ConflictException(`Payment method code ${dto.code} is already in use`);
+      this.logger.debug(
+        { code: dto.code },
+        'Payment method creation rejected because code is already in use',
+      );
+      throw new ConflictException(
+        `Payment method code ${dto.code} is already in use`,
+      );
     }
     const saved = await this.paymentMethodRepository.save(
       this.paymentMethodRepository.create({
@@ -77,11 +92,17 @@ export class PaymentMethodService {
         code: dto.code,
       }),
     );
-    this.logger.info({ paymentMethodId: saved.paymentMethodId }, 'Payment method created');
+    this.logger.info(
+      { paymentMethodId: saved.paymentMethodId },
+      'Payment method created',
+    );
     return PaymentMethodMapper.toResponseDto(saved);
   }
 
-  async update(id: number, dto: UpdatePaymentMethodDto): Promise<PaymentMethodResponseDto> {
+  async update(
+    id: number,
+    dto: UpdatePaymentMethodDto,
+  ): Promise<PaymentMethodResponseDto> {
     const existing = await this.findByIdOrThrow(id);
     const hasChanges =
       (dto.name !== undefined && existing.name !== dto.name) ||
@@ -92,25 +113,37 @@ export class PaymentMethodService {
     if (dto.code !== undefined && dto.code !== existing.code) {
       const duplicate = await this.findByCodeOrNull(dto.code);
       if (duplicate) {
-        this.logger.debug({ code: dto.code }, 'Payment method update rejected because code is already in use');
-        throw new ConflictException(`Payment method code ${dto.code} is already in use`);
+        this.logger.debug(
+          { code: dto.code },
+          'Payment method update rejected because code is already in use',
+        );
+        throw new ConflictException(
+          `Payment method code ${dto.code} is already in use`,
+        );
       }
     }
 
     const merged = this.paymentMethodRepository.merge(existing, dto);
     const saved = await this.paymentMethodRepository.save(merged);
-    this.logger.info({ paymentMethodId: saved.paymentMethodId }, 'Payment method updated');
+    this.logger.info(
+      { paymentMethodId: saved.paymentMethodId },
+      'Payment method updated',
+    );
     return PaymentMethodMapper.toResponseDto(saved);
   }
 
   async remove(id: number): Promise<void> {
     const existing = await this.findByIdOrThrow(id);
-    await this.paymentMethodRepository.delete({ paymentMethodId: existing.paymentMethodId });
+    await this.paymentMethodRepository.delete({
+      paymentMethodId: existing.paymentMethodId,
+    });
     this.logger.info({ paymentMethodId: id }, 'Payment method removed');
   }
 
   async findByIdOrThrow(id: number): Promise<PaymentMethod> {
-    const entity = await this.paymentMethodRepository.findOneBy({ paymentMethodId: id });
+    const entity = await this.paymentMethodRepository.findOneBy({
+      paymentMethodId: id,
+    });
     if (!entity) {
       this.logger.debug({ paymentMethodId: id }, 'Payment method not found');
       throw new PaymentMethodNotFoundException(id);

@@ -1,4 +1,12 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Branch } from '../../module-branch/entity/branch.entity';
 import { ConsultingRoom } from '../../module-consulting-room/entity/consulting-room.entity';
@@ -53,7 +61,13 @@ export class Appointment {
   @Column({ name: 'notes', type: 'text', nullable: true })
   notes: string | null;
 
-  @Column({ name: 'price_at_booking', type: 'numeric', precision: 14, scale: 2, nullable: true })
+  @Column({
+    name: 'price_at_booking',
+    type: 'numeric',
+    precision: 14,
+    scale: 2,
+    nullable: true,
+  })
   priceAtBooking: string | null;
 
   @ManyToOne(() => User, { nullable: false })

@@ -10,12 +10,10 @@ import { PersonService } from './person.service';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     DatabaseModule,
-    TypeOrmModule.forFeature([
-      Person,
-    ]),
+    TypeOrmModule.forFeature([Person]),
   ],
   providers: [PersonService],
   controllers: [PersonController],
-  exports: [],
+  exports: [PersonService],
 })
 export class PersonModule {}

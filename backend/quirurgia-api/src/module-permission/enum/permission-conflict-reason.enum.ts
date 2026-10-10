@@ -1,4 +1,4 @@
 export enum PermissionConflictReasonEnum {
   CODE = 'code',
-  RESOUCE_ACTION = 'resource related to this action'
+  RESOUCE_ACTION = 'resource related to this action',
 }

@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -16,7 +28,9 @@ export class BranchController {
 
   @RequirePermissions('branches.read')
   @Get()
-  findAll(@Query() query?: FindBranchQueryDto): Promise<OffsetPaginatedResult<BranchResponseDto>> {
+  findAll(
+    @Query() query?: FindBranchQueryDto,
+  ): Promise<OffsetPaginatedResult<BranchResponseDto>> {
     return this.branchService.findAll(query);
   }
 
@@ -34,7 +48,10 @@ export class BranchController {
 
   @RequirePermissions('branches.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBranchDto): Promise<BranchResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateBranchDto,
+  ): Promise<BranchResponseDto> {
     return this.branchService.update(id, dto);
   }
 

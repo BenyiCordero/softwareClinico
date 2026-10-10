@@ -11,10 +11,7 @@ import { AreaService } from './area.service';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     DatabaseModule,
-    TypeOrmModule.forFeature([
-      Area,
-      Branch,
-    ]),
+    TypeOrmModule.forFeature([Area, Branch]),
   ],
   providers: [AreaService],
   controllers: [AreaController],

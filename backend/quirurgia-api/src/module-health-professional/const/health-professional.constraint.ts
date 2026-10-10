@@ -7,11 +7,19 @@ export const HEALTH_PROFESSIONAL_CONSTRAINT_MAP: Record<
   () => HealthProfessionalConflictException
 > = {
   [HealthProfessionalConstraintEnum.EMPLOYEE]: () =>
-    new HealthProfessionalConflictException(HealthProfessionalConflictReasonEnum.EMPLOYEE),
+    new HealthProfessionalConflictException(
+      HealthProfessionalConflictReasonEnum.EMPLOYEE,
+    ),
   [HealthProfessionalConstraintEnum.LICENSE]: () =>
-    new HealthProfessionalConflictException(HealthProfessionalConflictReasonEnum.LICENSE),
+    new HealthProfessionalConflictException(
+      HealthProfessionalConflictReasonEnum.LICENSE,
+    ),
   [HealthProfessionalConstraintEnum.SPECIALTY_PAIR]: () =>
-    new HealthProfessionalConflictException(HealthProfessionalConflictReasonEnum.SPECIALTY_PAIR),
+    new HealthProfessionalConflictException(
+      HealthProfessionalConflictReasonEnum.SPECIALTY_PAIR,
+    ),
   [HealthProfessionalConstraintEnum.PRIMARY_SPECIALTY]: () =>
-    new HealthProfessionalConflictException(HealthProfessionalConflictReasonEnum.PRIMARY_SPECIALTY),
+    new HealthProfessionalConflictException(
+      HealthProfessionalConflictReasonEnum.PRIMARY_SPECIALTY,
+    ),
 };

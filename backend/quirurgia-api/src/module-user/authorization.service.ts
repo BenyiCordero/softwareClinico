@@ -23,7 +23,10 @@ export class AuthorizationService {
     private readonly overrideRepository: Repository<UserPermissionOverride>,
   ) {}
 
-  async getEffectivePermissions(userId: number, branchId?: number): Promise<Set<string>> {
+  async getEffectivePermissions(
+    userId: number,
+    branchId?: number,
+  ): Promise<Set<string>> {
     const now = new Date();
 
     const roleQuery = this.userRoleRepository
@@ -33,11 +36,21 @@ export class AuthorizationService {
       .innerJoin('rolePermission.permission', 'permission')
       .select('permission.code', 'code')
       .where('userRole.user_id = :userId', { userId })
-      .andWhere('userRole.status = :userRoleStatus', { userRoleStatus: UserRoleStatus.ACTIVE })
+      .andWhere('userRole.status = :userRoleStatus', {
+        userRoleStatus: UserRoleStatus.ACTIVE,
+      })
       .andWhere('role.status = :roleStatus', { roleStatus: RoleStatus.ACTIVE })
-      .andWhere('permission.status = :permissionStatus', { permissionStatus: PermissionStatus.ACTIVE })
-      .andWhere('(userRole.valid_from IS NULL OR userRole.valid_from <= :now)', { now })
-      .andWhere('(userRole.valid_until IS NULL OR userRole.valid_until > :now)', { now });
+      .andWhere('permission.status = :permissionStatus', {
+        permissionStatus: PermissionStatus.ACTIVE,
+      })
+      .andWhere(
+        '(userRole.valid_from IS NULL OR userRole.valid_from <= :now)',
+        { now },
+      )
+      .andWhere(
+        '(userRole.valid_until IS NULL OR userRole.valid_until > :now)',
+        { now },
+      );
     this.applyBranchScope(roleQuery, 'userRole', branchId);
 
     const overrideQuery = this.overrideRepository
@@ -46,10 +59,20 @@ export class AuthorizationService {
       .select('permission.code', 'code')
       .addSelect('override.effect', 'effect')
       .where('override.user_id = :userId', { userId })
-      .andWhere('override.status = :overrideStatus', { overrideStatus: PermissionOverrideStatus.ACTIVE })
-      .andWhere('permission.status = :permissionStatus', { permissionStatus: PermissionStatus.ACTIVE })
-      .andWhere('(override.valid_from IS NULL OR override.valid_from <= :now)', { now })
-      .andWhere('(override.valid_until IS NULL OR override.valid_until > :now)', { now });
+      .andWhere('override.status = :overrideStatus', {
+        overrideStatus: PermissionOverrideStatus.ACTIVE,
+      })
+      .andWhere('permission.status = :permissionStatus', {
+        permissionStatus: PermissionStatus.ACTIVE,
+      })
+      .andWhere(
+        '(override.valid_from IS NULL OR override.valid_from <= :now)',
+        { now },
+      )
+      .andWhere(
+        '(override.valid_until IS NULL OR override.valid_until > :now)',
+        { now },
+      );
     this.applyBranchScope(overrideQuery, 'override', branchId);
 
     const [roleRows, overrideRows] = await Promise.all([
@@ -69,14 +92,25 @@ export class AuthorizationService {
     return effective;
   }
 
-  async hasAllPermissions(userId: number, permissionCodes: string[], branchId?: number): Promise<boolean> {
+  async hasAllPermissions(
+    userId: number,
+    permissionCodes: string[],
+    branchId?: number,
+  ): Promise<boolean> {
     const effective = await this.getEffectivePermissions(userId, branchId);
     return permissionCodes.every((code) => effective.has(code));
   }
 
-  private applyBranchScope(query: SelectQueryBuilder<any>, alias: string, branchId?: number): void {
+  private applyBranchScope(
+    query: SelectQueryBuilder<any>,
+    alias: string,
+    branchId?: number,
+  ): void {
     if (branchId) {
-      query.andWhere(`(${alias}.branch_id IS NULL OR ${alias}.branch_id = :branchId)`, { branchId });
+      query.andWhere(
+        `(${alias}.branch_id IS NULL OR ${alias}.branch_id = :branchId)`,
+        { branchId },
+      );
     } else {
       query.andWhere(`${alias}.branch_id IS NULL`);
     }

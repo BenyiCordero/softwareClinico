@@ -1,9 +1,19 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { PatientCategory } from '../../module-patient-category/entity/patient-category.entity';
 import { Person } from '../../module-person/entity/person.entity';
 import { BloodType } from '../enum/blood-type.enum';
 import { PatientStatus } from '../enum/patient-status.enum';
+import { EmergencyContact } from './emergency-contact.entity';
 
 @Entity()
 export class Patient {
@@ -20,6 +30,9 @@ export class Patient {
   @ManyToOne(() => PatientCategory, { nullable: false })
   @JoinColumn({ name: 'patient_category_id' })
   patientCategory: Relation<PatientCategory>;
+
+  @OneToMany(() => EmergencyContact, (contact) => contact.patient)
+  emergencyContacts: Relation<EmergencyContact[]>;
 
   @Column({ name: 'blood_type', type: 'enum', enum: BloodType, nullable: true })
   bloodType: BloodType | null;

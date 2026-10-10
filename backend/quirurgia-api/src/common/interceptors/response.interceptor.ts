@@ -3,24 +3,28 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from "@nestjs/common";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
-import { PaginationDto } from "../pagination/type/pagination.type";
-import { SuccessResponse } from "../pagination/interface/success-response.interface";
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { PaginationDto } from '../pagination/type/pagination.type';
+import { SuccessResponse } from '../pagination/interface/success-response.interface';
 
 interface PaginatedControllerResponse<T> {
   data: T;
   pagination: PaginationDto;
 }
 
-type ControllerResponse<T> =
-  | T
-  | PaginatedControllerResponse<T>;
+type ControllerResponse<T> = T | PaginatedControllerResponse<T>;
 
 @Injectable()
-export class ResponseInterceptor<T> implements NestInterceptor<ControllerResponse<T>, SuccessResponse<T>> {
-  intercept(context: ExecutionContext, next: CallHandler<ControllerResponse<T>>): Observable<SuccessResponse<T>> {
+export class ResponseInterceptor<T> implements NestInterceptor<
+  ControllerResponse<T>,
+  SuccessResponse<T>
+> {
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<ControllerResponse<T>>,
+  ): Observable<SuccessResponse<T>> {
     return next.handle().pipe(
       map((response): SuccessResponse<T> => {
         if (this.isPaginatedResponse(response)) {
@@ -41,12 +45,14 @@ export class ResponseInterceptor<T> implements NestInterceptor<ControllerRespons
     );
   }
 
-  private isPaginatedResponse(response: ControllerResponse<T>): response is PaginatedControllerResponse<T> {
+  private isPaginatedResponse(
+    response: ControllerResponse<T>,
+  ): response is PaginatedControllerResponse<T> {
     return (
-      typeof response === "object" &&
+      typeof response === 'object' &&
       response !== null &&
-      "data" in response &&
-      "pagination" in response
+      'data' in response &&
+      'pagination' in response
     );
   }
 }

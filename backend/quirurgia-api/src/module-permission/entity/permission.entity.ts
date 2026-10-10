@@ -1,4 +1,10 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PermissionStatus } from '../enum/permission-status.enum';
 import { PermissionResource } from '../enum/permission-resource.enum';
 import { PermissionAction } from '../enum/permission-action.enum';
@@ -22,7 +28,12 @@ export class Permission {
   @Column({ name: 'description', type: 'text' })
   description: string;
 
-  @Column({ type: 'enum', enum: PermissionStatus, name: 'status', default: PermissionStatus.ACTIVE })
+  @Column({
+    type: 'enum',
+    enum: PermissionStatus,
+    name: 'status',
+    default: PermissionStatus.ACTIVE,
+  })
   status: PermissionStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

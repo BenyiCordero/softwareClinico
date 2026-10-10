@@ -1,11 +1,20 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import type { Relation } from 'typeorm';
 import { Specialty } from '../../module-specialty/entity/specialty.entity';
 import { SpecialtyPriority } from '../enum/specialty-priority.enum';
 import { HealthProfessional } from './health-professional.entity';
 
 @Entity('professional_specialties')
-@Index('UQ_professional_specialty_pair', ['healthProfessional', 'specialty'], { unique: true })
+@Index('UQ_professional_specialty_pair', ['healthProfessional', 'specialty'], {
+  unique: true,
+})
 @Index('UQ_professional_specialty_primary', ['healthProfessional'], {
   unique: true,
   where: `"priority" = 'PRIMARY'`,

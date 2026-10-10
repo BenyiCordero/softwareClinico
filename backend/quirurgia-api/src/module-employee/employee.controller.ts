@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -19,7 +31,9 @@ export class EmployeeController {
 
   @RequirePermissions('employees.read')
   @Get()
-  findAll(@Query() query?: FindEmployeeQueryDto): Promise<OffsetPaginatedResult<EmployeeResponseDto>> {
+  findAll(
+    @Query() query?: FindEmployeeQueryDto,
+  ): Promise<OffsetPaginatedResult<EmployeeResponseDto>> {
     return this.employeeService.findAll(query);
   }
 
@@ -37,7 +51,10 @@ export class EmployeeController {
 
   @RequirePermissions('employees.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateEmployeeDto): Promise<EmployeeResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateEmployeeDto,
+  ): Promise<EmployeeResponseDto> {
     return this.employeeService.update(id, dto);
   }
 
@@ -50,7 +67,9 @@ export class EmployeeController {
 
   @RequirePermissions('employees.read')
   @Get(':id/assignments')
-  findAssignments(@Param('id', ParseIntPipe) id: number): Promise<EmployeeAssignmentResponseDto[]> {
+  findAssignments(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<EmployeeAssignmentResponseDto[]> {
     return this.employeeService.findAssignments(id);
   }
 

@@ -6,5 +6,8 @@ export const PATIENT_CATEGORY_CONSTRAINT_MAP: Record<
   PatientCategoryConstraintEnum,
   () => PatientCategoryConflictException
 > = {
-  [PatientCategoryConstraintEnum.NAME]: () => new PatientCategoryConflictException(PatientCategoryConflictReasonEnum.NAME),
+  [PatientCategoryConstraintEnum.NAME]: () =>
+    new PatientCategoryConflictException(
+      PatientCategoryConflictReasonEnum.NAME,
+    ),
 };

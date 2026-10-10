@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -16,7 +28,9 @@ export class PositionController {
 
   @RequirePermissions('positions.read')
   @Get()
-  findAll(@Query() query?: FindPositionQueryDto): Promise<OffsetPaginatedResult<PositionResponseDto>> {
+  findAll(
+    @Query() query?: FindPositionQueryDto,
+  ): Promise<OffsetPaginatedResult<PositionResponseDto>> {
     return this.positionService.findAll(query);
   }
 
@@ -34,7 +48,10 @@ export class PositionController {
 
   @RequirePermissions('positions.update')
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePositionDto): Promise<PositionResponseDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePositionDto,
+  ): Promise<PositionResponseDto> {
     return this.positionService.update(id, dto);
   }
 

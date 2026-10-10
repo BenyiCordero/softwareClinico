@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
@@ -16,21 +20,41 @@ import { PATIENT_CATEGORY_CONSTRAINT_MAP } from './const/patient-category.constr
 @Injectable()
 export class PatientCategoryService {
   constructor(
-    @InjectRepository(PatientCategory) private readonly repository: Repository<PatientCategory>,
+    @InjectRepository(PatientCategory)
+    private readonly repository: Repository<PatientCategory>,
     private readonly databaseExceptionMapper: DatabaseExceptionMapper,
   ) {}
 
-  async findAll(filters: FindPatientCategoryQueryDto = {}): Promise<OffsetPaginatedResult<PatientCategoryResponseDto>> {
+  async findAll(
+    filters: FindPatientCategoryQueryDto = {},
+  ): Promise<OffsetPaginatedResult<PatientCategoryResponseDto>> {
     const page = filters.page ?? 1;
     const limit = filters.limit ?? 100;
-    const query = this.repository.createQueryBuilder('category').orderBy('category.name', 'ASC');
-    if (filters.name) query.andWhere('category.name ILIKE :name', { name: `%${filters.name}%` });
-    if (filters.status) query.andWhere('category.status = :status', { status: filters.status });
-    const [entities, totalItems] = await query.skip((page - 1) * limit).take(limit).getManyAndCount();
+    const query = this.repository
+      .createQueryBuilder('category')
+      .orderBy('category.name', 'ASC');
+    if (filters.name)
+      query.andWhere('category.name ILIKE :name', {
+        name: `%${filters.name}%`,
+      });
+    if (filters.status)
+      query.andWhere('category.status = :status', { status: filters.status });
+    const [entities, totalItems] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
     const totalPages = Math.ceil(totalItems / limit);
     return {
       data: entities.map(PatientCategoryMapper.toResponseDto),
-      pagination: { type: PaginationEnum.OFFSET, page, limit, totalItems, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 },
+      pagination: {
+        type: PaginationEnum.OFFSET,
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
     };
   }
 
@@ -38,22 +62,42 @@ export class PatientCategoryService {
     return PatientCategoryMapper.toResponseDto(await this.findByIdOrThrow(id));
   }
 
-  async create(dto: CreatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
+  async findEntityById(id: number): Promise<PatientCategory> {
+    return this.findByIdOrThrow(id);
+  }
+
+  async create(
+    dto: CreatePatientCategoryDto,
+  ): Promise<PatientCategoryResponseDto> {
     await this.ensureNameAvailable(dto.name);
     try {
-      return PatientCategoryMapper.toResponseDto(await this.repository.save(this.repository.create(dto)));
+      return PatientCategoryMapper.toResponseDto(
+        await this.repository.save(this.repository.create(dto)),
+      );
     } catch (error: unknown) {
-      throw this.databaseExceptionMapper.fromTypeOrmError(error, PATIENT_CATEGORY_CONSTRAINT_MAP);
+      throw this.databaseExceptionMapper.fromTypeOrmError(
+        error,
+        PATIENT_CATEGORY_CONSTRAINT_MAP,
+      );
     }
   }
 
-  async update(id: number, dto: UpdatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
+  async update(
+    id: number,
+    dto: UpdatePatientCategoryDto,
+  ): Promise<PatientCategoryResponseDto> {
     const category = await this.findByIdOrThrow(id);
-    if (dto.name && dto.name !== category.name) await this.ensureNameAvailable(dto.name, id);
+    if (dto.name && dto.name !== category.name)
+      await this.ensureNameAvailable(dto.name, id);
     try {
-      return PatientCategoryMapper.toResponseDto(await this.repository.save(this.repository.merge(category, dto)));
+      return PatientCategoryMapper.toResponseDto(
+        await this.repository.save(this.repository.merge(category, dto)),
+      );
     } catch (error: unknown) {
-      throw this.databaseExceptionMapper.fromTypeOrmError(error, PATIENT_CATEGORY_CONSTRAINT_MAP);
+      throw this.databaseExceptionMapper.fromTypeOrmError(
+        error,
+        PATIENT_CATEGORY_CONSTRAINT_MAP,
+      );
     }
   }
 
@@ -66,13 +110,25 @@ export class PatientCategoryService {
 
   private async findByIdOrThrow(id: number): Promise<PatientCategory> {
     const category = await this.repository.findOneBy({ patientCategoryId: id });
-    if (!category) throw new NotFoundException(`Patient category with id ${id} not found`);
+    if (!category)
+      throw new NotFoundException(`Patient category with id ${id} not found`);
     return category;
   }
 
-  private async ensureNameAvailable(name: string, excludeId?: number): Promise<void> {
-    const query = this.repository.createQueryBuilder('category').where('LOWER(category.name) = LOWER(:name)', { name });
-    if (excludeId) query.andWhere('category.patient_category_id != :excludeId', { excludeId });
-    if (await query.getExists()) throw new ConflictException(`Patient category name ${name} is already in use`);
+  private async ensureNameAvailable(
+    name: string,
+    excludeId?: number,
+  ): Promise<void> {
+    const query = this.repository
+      .createQueryBuilder('category')
+      .where('LOWER(category.name) = LOWER(:name)', { name });
+    if (excludeId)
+      query.andWhere('category.patient_category_id != :excludeId', {
+        excludeId,
+      });
+    if (await query.getExists())
+      throw new ConflictException(
+        `Patient category name ${name} is already in use`,
+      );
   }
 }
