@@ -38,6 +38,10 @@ export class PatientCategoryService {
     return PatientCategoryMapper.toResponseDto(await this.findByIdOrThrow(id));
   }
 
+  async findEntityById(id: number): Promise<PatientCategory> {
+    return this.findByIdOrThrow(id);
+  }
+
   async create(dto: CreatePatientCategoryDto): Promise<PatientCategoryResponseDto> {
     await this.ensureNameAvailable(dto.name);
     try {

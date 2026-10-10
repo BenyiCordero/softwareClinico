@@ -16,6 +16,6 @@ import { PersonService } from './person.service';
   ],
   providers: [PersonService],
   controllers: [PersonController],
-  exports: [],
+  exports: [PersonService],
 })
 export class PersonModule {}

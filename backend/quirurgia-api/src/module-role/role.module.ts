@@ -19,7 +19,8 @@ import { DatabaseModule } from '../common/module/database.module';
   ],
   providers: [
     RoleService,
-    RolePermissionService
+    RolePermissionService,
+    DatabaseExceptionMapper,
   ],
   controllers: [],
   exports: [

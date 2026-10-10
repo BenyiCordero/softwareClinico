@@ -34,6 +34,7 @@ export const PERMISSION_CATALOG: Record<PermissionResource, readonly PermissionA
     PermissionAction.UPDATE,
     PermissionAction.ACTIVATE,
     PermissionAction.DEACTIVATE,
+    PermissionAction.ARCHIVE,
     PermissionAction.EXPORT,
   ],
   [PermissionResource.CLINICAL_RECORDS]: [

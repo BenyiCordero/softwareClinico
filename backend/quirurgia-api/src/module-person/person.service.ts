@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, EntityManager, Repository } from 'typeorm';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
 import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
@@ -74,6 +74,23 @@ export class PersonService {
     }
   }
 
+  async createEntity(dto: CreatePersonDto, manager?: EntityManager): Promise<Person> {
+    const repository = manager?.getRepository(Person) ?? this.repository;
+    await this.ensureIdentifiersAvailable(dto.curp ?? null, dto.rfc ?? null, undefined, repository);
+    const person = repository.create({ ...dto, middleName: dto.middleName ?? null, secondLastName: dto.secondLastName ?? null, curp: dto.curp ?? null, rfc: dto.rfc ?? null, secondaryPhone: dto.secondaryPhone ?? null, email: dto.email ?? null, address: dto.address ?? null, city: dto.city ?? null, state: dto.state ?? null, postalCode: dto.postalCode ?? null, deletedAt: null });
+    return repository.save(person);
+  }
+
+  async updateEntity(id: number, dto: UpdatePersonDto, manager?: EntityManager): Promise<Person> {
+    const repository = manager?.getRepository(Person) ?? this.repository;
+    const person = await repository.findOneBy({ personId: id });
+    if (!person) throw new NotFoundException(`Person with id ${id} not found`);
+    const curp = dto.curp === undefined ? person.curp : dto.curp;
+    const rfc = dto.rfc === undefined ? person.rfc : dto.rfc;
+    await this.ensureIdentifiersAvailable(curp, rfc, id, repository);
+    return repository.save(repository.merge(person, dto));
+  }
+
   async update(id: number, dto: UpdatePersonDto): Promise<PersonResponseDto> {
     const person = await this.findByIdOrThrow(id);
     const curp = dto.curp === undefined ? person.curp : dto.curp;
@@ -103,14 +120,14 @@ export class PersonService {
     return person;
   }
 
-  private async ensureIdentifiersAvailable(curp: string | null, rfc: string | null, excludeId?: number): Promise<void> {
+  private async ensureIdentifiersAvailable(curp: string | null, rfc: string | null, excludeId?: number, repository: Repository<Person> = this.repository): Promise<void> {
     if (curp) {
-      const query = this.repository.createQueryBuilder('person').where('person.curp = :curp', { curp });
+      const query = repository.createQueryBuilder('person').where('person.curp = :curp', { curp });
       if (excludeId) query.andWhere('person.person_id != :excludeId', { excludeId });
       if (await query.getExists()) throw new ConflictException(`Person curp ${curp} is already in use`);
     }
     if (rfc) {
-      const query = this.repository.createQueryBuilder('person').where('person.rfc = :rfc', { rfc });
+      const query = repository.createQueryBuilder('person').where('person.rfc = :rfc', { rfc });
       if (excludeId) query.andWhere('person.person_id != :excludeId', { excludeId });
       if (await query.getExists()) throw new ConflictException(`Person rfc ${rfc} is already in use`);
     }
