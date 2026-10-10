@@ -7,6 +7,7 @@ import { RolePermissionService } from './role-permission.service';
 import { PermissionModule } from '../module-permission/permission.module';
 import { DatabaseExceptionMapper } from '../common/database/errors/database-exception.mapper';
 import { DatabaseModule } from '../common/module/database.module';
+import { RoleController } from './role.controller';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { DatabaseModule } from '../common/module/database.module';
     DatabaseModule,
   ],
   providers: [RoleService, RolePermissionService, DatabaseExceptionMapper],
-  controllers: [],
+  controllers: [RoleController],
   exports: [RolePermissionService],
 })
 export class RoleModule {}
