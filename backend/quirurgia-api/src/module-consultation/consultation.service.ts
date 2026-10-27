@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
+import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
 import { Appointment } from '../module-appointment/entity/appointment.entity';
 import { Branch } from '../module-branch/entity/branch.entity';
 import { ConsultingRoom } from '../module-consulting-room/entity/consulting-room.entity';
@@ -38,8 +41,12 @@ export class ConsultationService {
     @InjectRepository(ConsultingRoom) private rooms: Repository<ConsultingRoom>,
     @InjectRepository(Service) private services: Repository<Service>,
   ) {}
-  findAll() {
-    return this.consultations.find({
+  async findAll(
+    query: OffsetPaginationQueryDto = {},
+  ): Promise<OffsetPaginatedResult<Consultation>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
+    const [data, totalItems] = await this.consultations.findAndCount({
       relations: {
         clinicalRecord: true,
         healthProfessional: true,
@@ -47,7 +54,22 @@ export class ConsultationService {
         appointment: true,
       },
       order: { consultationId: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    const totalPages = Math.ceil(totalItems / limit);
+    return {
+      data,
+      pagination: {
+        type: PaginationEnum.OFFSET,
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
   async findOne(id: number) {
     const item = await this.consultations.findOne({

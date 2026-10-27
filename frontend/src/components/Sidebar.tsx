@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react'
+import { useState, type MouseEvent, type ReactNode } from 'react'
 import { ChevronRight, HeartPulse } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useBranch } from '@/app/providers/branch-context'
@@ -12,29 +12,26 @@ interface SidebarProps {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [prevPathname, setPrevPathname] = useState(pathname)
-  const [openOverride, setOpenOverride] = useState<Record<string, boolean>>({})
-  const { can } = useBranch()
+  const [manualOpen, setManualOpen] = useState<{ pathname: string; id: string | null } | null>(null)
+  const { can, permissionsLoading } = useBranch()
 
-  // On navigation, drop manual overrides so auto-open applies again.
-  if (prevPathname !== pathname) {
-    setPrevPathname(pathname)
-    setOpenOverride({})
-  }
+  const containsPath = (item: SidebarItem): boolean =>
+    item.path === pathname || Boolean(item.items?.some(containsPath))
 
-  // Manual toggle wins; otherwise the section holding the current route opens.
-  const isAutoOpen = (item: SidebarItem): boolean =>
-    !!item.items?.some((sub) => sub.path === pathname)
+  const containsId = (item: SidebarItem, id: string): boolean =>
+    item.id === id || Boolean(item.items?.some((child) => containsId(child, id)))
 
-  const isOpen = (item: SidebarItem) => openOverride[item.id] ?? isAutoOpen(item)
+  const isOpen = (item: SidebarItem): boolean =>
+    manualOpen?.pathname === pathname
+      ? containsId(item, manualOpen.id ?? '')
+      : containsPath(item)
 
   const toggle = (item: SidebarItem) => {
-    const next = !(openOverride[item.id] ?? isAutoOpen(item))
-    setOpenOverride((prev) => ({ ...prev, [item.id]: next }))
+    setManualOpen({ pathname, id: isOpen(item) ? null : item.id })
   }
 
-  const go = (item: SidebarItem) => (e: MouseEvent) => {
-    e.preventDefault()
+  const go = (item: SidebarItem) => (event: MouseEvent) => {
+    event.preventDefault()
     if (item.path) {
       navigate(item.path)
       onClose()
@@ -47,78 +44,42 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     return ownPermission && item.items.some(canRender)
   }
 
-  return (
-    <>
-      <aside id="sidebar" className={open ? 'sidebar-open' : ''}>
-        <div className="sidebar-header">
-          <div className="sidebar-brand-icon">
-            <HeartPulse className="h-7 w-7" />
-          </div>
-          <div className="sidebar-brand-text">
-            <div className="sidebar-title">Quirurgia</div>
-            <small className="sidebar-sub">Panel</small>
-          </div>
-        </div>
+  const renderItem = (item: SidebarItem, depth = 0): ReactNode => {
+    const hasChildren = Boolean(item.items?.length)
+    const ItemIcon = item.icon
+    if (hasChildren) {
+      return <li key={item.id}>
+        <button type="button" className={`sidebar-item sidebar-sub-toggle ${isOpen(item) ? 'open' : ''}`} onClick={() => toggle(item)} aria-expanded={isOpen(item)} aria-controls={`sidebar-submenu-${item.id}`}>
+          <ChevronRight className="sidebar-item-arrow" />
+          <ItemIcon className="sidebar-item-icon h-4 w-4" />
+          <span>{item.label}</span>
+        </button>
+        <ul id={`sidebar-submenu-${item.id}`} className={`sidebar-submenu sidebar-submenu-level-${depth + 1} ${isOpen(item) ? 'open' : ''}`}>
+          {item.items?.filter(canRender).map((child) => renderItem(child, depth + 1))}
+        </ul>
+      </li>
+    }
+    return <li key={item.path ?? item.id}>
+      <a href={item.path} className={`sidebar-item ${item.path === pathname ? 'active' : ''}`} onClick={go(item)} aria-current={item.path === pathname ? 'page' : undefined}>
+        <ItemIcon className="sidebar-item-icon h-4 w-4" />
+        <span>{item.label}</span>
+      </a>
+    </li>
+  }
 
-        <nav className="sidebar-nav" id="sidebar-nav">
-          <ul className="sidebar-menu">
-            {sidebarConfig.filter(canRender).map((item) => {
-              const ItemIcon = item.icon
-              return item.items && item.items.length ? (
-                <li key={item.id}>
-                  <a
-                    href="#"
-                    className={`sidebar-item sidebar-sub-toggle ${isOpen(item) ? 'open' : ''}`}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      toggle(item)
-                    }}
-                    aria-expanded={isOpen(item)}
-                  >
-                    <ChevronRight className="sidebar-item-arrow" />
-                    <ItemIcon className="sidebar-item-icon h-4 w-4" />
-                    <span>{item.label}</span>
-                  </a>
-                  <ul className={`sidebar-submenu ${isOpen(item) ? 'open' : ''}`}>
-                    {item.items.filter(canRender).map((sub) => {
-                      const SubIcon = sub.icon
-                      return (
-                        <li key={sub.path}>
-                          <a
-                            href="#"
-                            className={`sidebar-item sidebar-sub-item ${sub.path === pathname ? 'active' : ''}`}
-                            onClick={go(sub)}
-                          >
-                            <SubIcon className="sidebar-item-icon h-4 w-4" />
-                            <span>{sub.label}</span>
-                          </a>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </li>
-              ) : (
-                <li key={item.path}>
-                  <a
-                    href="#"
-                    className={`sidebar-item ${item.path === pathname ? 'active' : ''}`}
-                    onClick={go(item)}
-                  >
-                    <ItemIcon className="sidebar-item-icon h-4 w-4" />
-                    <span>{item.label}</span>
-                  </a>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
-
-        <div className="sidebar-footer">
-          <small className="text-ink-muted">v1.0.0</small>
-        </div>
-      </aside>
-
-      {open && <div className="sidebar-overlay active" onClick={onClose} />}
-    </>
-  )
+  return <>
+    <aside id="sidebar" className={open ? 'sidebar-open' : ''}>
+      <div className="sidebar-header">
+        <div className="sidebar-brand-icon"><HeartPulse className="h-7 w-7" /></div>
+        <div className="sidebar-brand-text"><div className="sidebar-title">Quirurgia</div><small className="sidebar-sub">Panel</small></div>
+      </div>
+      <nav className="sidebar-nav" id="sidebar-nav" aria-label="Navegación principal">
+        <ul className="sidebar-menu">
+          {permissionsLoading ? <li className="px-4 py-3 text-sm text-ink-muted" role="status">Cargando permisos...</li> : sidebarConfig.filter(canRender).map((item) => renderItem(item))}
+        </ul>
+      </nav>
+      <div className="sidebar-footer"><small className="text-ink-muted">v1.0.0</small></div>
+    </aside>
+    {open && <div className="sidebar-overlay active" onClick={onClose} />}
+  </>
 }

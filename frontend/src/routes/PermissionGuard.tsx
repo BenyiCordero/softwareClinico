@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { useCan } from '@/app/providers/branch-context'
+import { useBranch, useCan } from '@/app/providers/branch-context'
+import AccessDenied from '@/components/AccessDenied'
 
 interface PermissionGuardProps {
   permission?: string | string[]
@@ -11,9 +12,11 @@ interface PermissionGuardProps {
 export default function PermissionGuard({
   permission,
   mode = 'all',
-  fallback = null,
+  fallback = <AccessDenied />,
   children,
 }: PermissionGuardProps) {
+  const { permissionsLoading } = useBranch()
   const can = useCan(permission, mode)
+  if (permissionsLoading) return <div className="page-content" role="status" aria-live="polite">Verificando permisos...</div>
   return can ? children : fallback
 }

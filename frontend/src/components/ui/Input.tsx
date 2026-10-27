@@ -8,12 +8,13 @@ export interface InputProps extends ComponentPropsWithoutRef<'input'> {
   leading?: ReactNode
   trailing?: ReactNode
   inputSize?: InputSize
+  wrapperClassName?: string
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, error = false, leading, trailing, inputSize = 'md', ...props }, ref) => {
+  ({ className, wrapperClassName, error = false, leading, trailing, inputSize = 'md', ...props }, ref) => {
     return (
-      <div className={cn('relative flex w-full items-center', className)}>
+      <div className={cn('relative flex w-full items-center', wrapperClassName)}>
         {leading && <span className="pointer-events-none absolute left-3 text-ink-muted">{leading}</span>}
         <input
           ref={ref}
@@ -23,11 +24,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             inputSize === 'md' ? 'h-9 px-3 text-sm' : 'h-8 px-2.5 text-xs',
             leading && 'pl-10',
             trailing && 'pr-10',
-            error
+           error
               ? 'border-danger focus:border-danger focus:ring-danger/15'
               : 'border-line focus:border-primary focus:ring-primary/15',
-            className,
-          )}
+             className,
+           )}
+           aria-invalid={error || undefined}
           {...props}
         />
         {trailing && <span className="pointer-events-none absolute right-3 text-ink-muted">{trailing}</span>}

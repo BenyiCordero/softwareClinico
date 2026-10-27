@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
+import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
 import { Branch } from '../module-branch/entity/branch.entity';
 import { ConsultingRoom } from '../module-consulting-room/entity/consulting-room.entity';
 import { HealthProfessional } from '../module-health-professional/entity/health-professional.entity';
@@ -47,7 +49,11 @@ export class AppointmentService {
     private readonly scheduleService: ScheduleService,
   ) {}
 
-  findAll(query: FindAppointmentQueryDto = {}) {
+  async findAll(
+    query: FindAppointmentQueryDto = {},
+  ): Promise<OffsetPaginatedResult<Appointment>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
     const qb = this.appointments
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
@@ -68,7 +74,23 @@ export class AppointmentService {
     if (query.from)
       qb.andWhere('appointment.start_at >= :from', { from: query.from });
     if (query.to) qb.andWhere('appointment.start_at < :to', { to: query.to });
-    return qb.getMany();
+    const [data, totalItems] = await qb
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+    const totalPages = Math.ceil(totalItems / limit);
+    return {
+      data,
+      pagination: {
+        type: PaginationEnum.OFFSET,
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   async findOne(id: number): Promise<Appointment> {

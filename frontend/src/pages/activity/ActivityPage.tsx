@@ -1,8 +1,8 @@
+import { useQuery } from '@tanstack/react-query'
 import { Activity } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function ActivityPage() {
-  return (
-    <PagePlaceholder title="Actividad" icon={Activity} description="Registro de actividad del sistema" />
-  )
-}
+import { useState } from 'react'
+import { Alert, Badge, DataTable, FilterActions, FilterBar, Input, PageHeader, Pagination, QueryError, type DataTableColumn } from '@/components/ui'
+import { useBranch } from '@/app/providers/branch-context'
+import { dashboardApi, type DashboardActivity } from '@/features/dashboard/dashboard.api'
+const columns: DataTableColumn<DashboardActivity>[] = [{ key: 'createdAt', header: 'Fecha', cell: (item) => new Date(item.createdAt).toLocaleString() }, { key: 'action', header: 'Acción', cell: (item) => <Badge variant="neutral">{item.action}</Badge> }, { key: 'resource', header: 'Recurso', cell: (item) => item.resource }, { key: 'resourceId', header: 'ID', cell: (item) => item.resourceId ?? '-' }, { key: 'userId', header: 'Usuario', cell: (item) => item.userId }]
+export default function ActivityPage() { const { can } = useBranch(); const [page, setPage] = useState(1); const [draftResource, setDraftResource] = useState(''); const [resource, setResource] = useState(''); const query = useQuery({ queryKey: ['audit-logs', page, resource], queryFn: () => dashboardApi.activity({ page, limit: 15, module: resource || undefined }), enabled: can('audit-logs.read') }); const pagination = query.data?.pagination; if (!can('audit-logs.read')) return <div className="page-content"><Alert variant="danger" title="Acceso denegado">No tienes permiso para consultar la actividad.</Alert></div>; return <div className="page-content"><PageHeader title="Actividad" description="Consulta las acciones registradas en el sistema." /><form onSubmit={(event) => { event.preventDefault(); setResource(draftResource.trim()); setPage(1) }}><FilterBar><Input value={draftResource} onChange={(event) => setDraftResource(event.target.value)} placeholder="Filtrar por módulo" leading={<Activity className="h-4 w-4" />} /><FilterActions onClear={() => { setDraftResource(''); setResource(''); setPage(1) }} /></FilterBar></form>{query.isError && <QueryError className="mb-5" title="No se pudo cargar la actividad" message="Revisa la conexión con el servicio de auditoría." onRetry={() => void query.refetch()} />}<div className="panel-card overflow-hidden"><DataTable columns={columns} data={query.data?.data ?? []} keyExtractor={(item) => item.auditLogId} loading={query.isLoading} emptyTitle="Sin actividad" emptyDescription="No hay registros para los filtros actuales." />{pagination?.type === 'OFFSET' && <Pagination page={pagination.page} pageCount={pagination.totalPages} total={pagination.totalItems} pageSize={pagination.limit} showTotal onChange={setPage} />}</div></div> }

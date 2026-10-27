@@ -31,12 +31,12 @@ export const Field = ({
       )}
       {children}
       {error ? (
-        <span className="mt-1 flex items-center gap-1 text-xs text-danger">
+        <span id={htmlFor ? `${htmlFor}-error` : undefined} role="alert" className="mt-1 flex items-center gap-1 text-xs text-danger">
           <CircleAlert className="h-3.5 w-3.5 shrink-0" />
           {error}
         </span>
       ) : hint ? (
-        <span className="mt-1 text-xs text-ink-muted">{hint}</span>
+        <span id={htmlFor ? `${htmlFor}-hint` : undefined} className="mt-1 text-xs text-ink-muted">{hint}</span>
       ) : null}
     </div>
   )

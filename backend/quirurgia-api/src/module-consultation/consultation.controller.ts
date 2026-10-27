@@ -7,10 +7,12 @@ import {
   Patch,
   Post,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
 import { ConsultationService } from './consultation.service';
 import {
   CreateClinicalNoteDto,
@@ -23,8 +25,10 @@ import {
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ConsultationController {
   constructor(private service: ConsultationService) {}
-  @Get() @RequirePermissions('consultations.read') findAll() {
-    return this.service.findAll();
+  @Get() @RequirePermissions('consultations.read') findAll(
+    @Query() query: OffsetPaginationQueryDto,
+  ) {
+    return this.service.findAll(query);
   }
   @Get(':id') @RequirePermissions('consultations.read') findOne(
     @Param('id', ParseIntPipe) id: number,

@@ -1,6 +1,7 @@
 import { HeartPulse, LogOut, Menu, RotateCw } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Avatar, Button } from '@/components/ui'
+import { useQueryClient } from '@tanstack/react-query'
+import { Avatar, Button, SearchableSelect } from '@/components/ui'
 import { useAuth } from '@/app/providers/auth-context'
 import { useBranch } from '@/app/providers/branch-context'
 
@@ -10,6 +11,7 @@ interface TopBarProps {
 
 export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { displayName, logout } = useAuth()
   const { branches, activeBranchId, isLoading: branchesLoading, setActiveBranchId } = useBranch()
 
@@ -45,6 +47,8 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
           id="btn-reload"
           type="button"
           title="Recargar módulo actual"
+          aria-label="Recargar módulo actual"
+          onClick={() => void queryClient.invalidateQueries()}
         >
           <RotateCw className="h-4 w-4" />
         </Button>
@@ -54,28 +58,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
             {displayName ?? 'Usuario'}
           </span>
         </div>
-        {branches.length > 0 && (
-          <label className="branch-selector-label" htmlFor="active-branch">
-            <span className="sr-only">Sucursal activa</span>
-            <select
-              id="active-branch"
-              className="branch-selector"
-              value={activeBranchId ?? ''}
-              disabled={branchesLoading}
-              onChange={(event) => {
-                const value = event.target.value
-                setActiveBranchId(value ? Number(value) : null)
-              }}
-            >
-              <option value="">Todas las sucursales</option>
-              {branches.map((branch) => (
-                <option key={branch.branchId} value={branch.branchId}>
-                  {branch.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        {branches.length > 0 && <div className="branch-selector-label"><span className="sr-only">Sucursal activa</span><SearchableSelect id="active-branch" aria-label="Sucursal activa" className="branch-selector-searchable" options={[{ value: '', label: 'Todas las sucursales' }, ...branches.map((branch) => ({ value: String(branch.branchId), label: branch.name }))]} value={activeBranchId === null ? '' : String(activeBranchId)} disabled={branchesLoading} onChange={(value) => setActiveBranchId(value ? Number(value) : null)} placeholder="Seleccionar sucursal" /></div>}
         <Avatar name={displayName ?? 'Usuario'} />
         <Button
           variant="outline"
@@ -83,6 +66,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
           id="btn-logout"
           type="button"
           title="Cerrar sesión"
+          aria-label="Cerrar sesión"
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4" />

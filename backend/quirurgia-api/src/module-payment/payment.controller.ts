@@ -8,19 +8,23 @@ import {
   Post,
   Req,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto, UpdatePaymentDto } from './dto';
 @Controller('payments')
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class PaymentController {
   constructor(private service: PaymentService) {}
-  @Get() @RequirePermissions('payments.read') findAll() {
-    return this.service.findAll();
+  @Get() @RequirePermissions('payments.read') findAll(
+    @Query() query: OffsetPaginationQueryDto,
+  ) {
+    return this.service.findAll(query);
   }
   @Get('order/:orderId') @RequirePermissions('payments.read') forOrder(
     @Param('orderId', ParseIntPipe) orderId: number,

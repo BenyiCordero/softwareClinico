@@ -1,0 +1,465 @@
+PLAN 2 - CIERRE FUNCIONAL, SEGURIDAD Y PREPARACION PARA PRODUCCION
+====================================================================
+
+Objetivo
+--------
+Llevar la plataforma clinica a un estado funcional, seguro, consistente y
+verificable en produccion. Este plan se basa en la auditoria completa de
+frontend, backend, base de datos e integracion.
+
+Reglas de ejecucion
+-------------------
+- Ejecutar las fases en orden; no avanzar si falla el criterio de aceptacion.
+- Mantener cada cambio en commits pequenos y por fase.
+- No reintroducir laboratorio ni farmacia en el frontend.
+- Mantener React/TypeScript/React Query/React Router en el frontend.
+- Toda mutacion debe tener permiso, validacion, auditoria y prueba.
+- Toda respuesta de listado principal debe ser paginada.
+- No devolver entidades TypeORM directamente desde endpoints publicos.
+- Validar siempre contra la base de datos y no solo contra mocks.
+
+Estado inicial conocido
+-----------------------
+- Frontend tests actuales: 13/13 correctos.
+- Frontend lint y build: correctos.
+- Backend build: correcto.
+- Backend lint: correcto con advertencias existentes.
+- Backend database-model.spec.ts: 49 fallos de 50 por desalineacion entre
+  entidades, migraciones, documentacion y expectativas del test.
+- Existe trabajo local sin commit; revisar git diff antes de cada fase.
+
+
+FASE 0 - CONTROL DEL ESTADO Y LINEA BASE
+=========================================
+
+Objetivo
+--------
+Establecer una linea base reproducible antes de corregir funcionalidad.
+
+Tareas
+------
+- Revisar git status, git diff y archivos generados.
+- Separar cambios funcionales de archivos generados como tsbuildinfo.
+- Confirmar una unica herramienta de instalacion por proyecto.
+- Elegir npm o pnpm y eliminar la ambiguedad entre package-lock.json y
+  pnpm-lock.yaml.
+- Agregar scripts de typecheck donde falten.
+- Documentar versiones de Node, npm/pnpm, PostgreSQL y variables requeridas.
+- Crear un entorno de staging con PostgreSQL real.
+
+Criterios de aceptacion
+-----------------------
+- Instalacion limpia reproducible.
+- Frontend y backend compilan desde cero.
+- Las variables obligatorias estan documentadas y validadas al arrancar.
+- Existe una base de datos de prueba limpia para E2E.
+
+
+FASE 1 - ALINEACION DE CONTRATOS FRONTEND/BACKEND
+=================================================
+
+Objetivo
+--------
+Eliminar todos los 400, 403 y 404 conocidos de los flujos principales.
+
+Pacientes
+---------
+- Alinear el formulario de pacientes con CreatePatientDto.
+- Enviar person anidado en lugar de personId.
+- No permitir editar patientNumber si el backend lo genera.
+- No enviar status en la creacion si el backend define el estado inicial.
+- Usar selects o busquedas para persona y categoria.
+
+Agenda y citas
+-------------
+- Reemplazar DELETE /schedules/:id por archivado PATCH o implementar DELETE.
+- Reemplazar DELETE /appointments/:id por POST /appointments/:id/cancel.
+- Mapear cada accion a su endpoint explicito:
+  confirm, check-in, start, complete, cancel y no-show.
+- Alinear permisos con nombres oficiales del backend:
+  appointments.check_in y appointments.mark_no_show.
+- Conectar reprogramacion de citas si la interfaz la ofrece.
+- Completar interfaz para horas y bloques de agenda.
+
+Expedientes y consultas
+-----------------------
+- Cambiar historial a GET /clinical-records/:id/history.
+- Cambiar documentos a GET/POST /clinical-records/:id/documents.
+- Decidir si una consulta puede tener documentos propios; si no, eliminar
+  ese metodo del API de consultas.
+- Eliminar transiciones genericas de consultas que no existan en backend o
+  implementar endpoints y permisos explicitos.
+
+Recetas
+-------
+- Eliminar transiciones genericas no soportadas o implementar la maquina de
+  estados en backend.
+- Implementar PATCH de prescription items o retirar la edicion frontend.
+- Alinear enums y transiciones permitidas.
+
+Ordenes y pagos
+--------------
+- Enviar todos los campos obligatorios de CreateOrderDto.
+- Enviar todos los campos obligatorios de CreateOrderDetailDto.
+- Eliminar POST /orders/:id/:action si no existe en backend o implementarlo.
+- Definir transiciones de pagos con estados y endpoints explicitos.
+- Eliminar transitionPayment que ignora action y envia {}.
+- Alinear operaciones de eliminar, archivar, cancelar y reembolsar.
+
+Precios especiales y permisos
+-----------------------------
+- Alinear estados frontend/backend de precios especiales:
+  SCHEDULED, ACTIVE, EXPIRED y REVOKED.
+- Alinear permisos de archive, delete y deactivate por modulo.
+- Revisar la excepcion de la ruta singular payment-method.
+
+Criterios de aceptacion
+-----------------------
+- Cada accion visible en frontend corresponde a una ruta backend real.
+- Cada payload pasa ValidationPipe con forbidNonWhitelisted.
+- No existen metodos API dinamicos no tipados para acciones de negocio.
+- Pruebas de contrato cubren cada endpoint principal.
+
+
+FASE 2 - SEGURIDAD, AUTORIZACION Y AISLAMIENTO
+===============================================
+
+Objetivo
+--------
+Evitar exposicion de secretos y acceso entre sucursales o usuarios.
+
+Tareas
+------
+- Marcar User.passwordHash como select: false.
+- Crear DTOs de respuesta explicitos para usuarios y relaciones.
+- Verificar que nunca se devuelvan passwordHash, refreshHash, tokens o
+  credenciales en ninguna respuesta.
+- Revisar todos los endpoints que cargan creator, registrar, updater o
+  uploader.
+- Implementar aislamiento por sucursal en pacientes, expedientes, consultas,
+  citas, ordenes, pagos, servicios y documentos.
+- No confiar unicamente en x-branch-id enviado por el cliente.
+- Validar que la sucursal elegida pertenece al usuario autenticado.
+- Validar pertenencia de todas las relaciones a la misma sucursal.
+- Excluir usuarios borrados logicamente de login, permisos y listados.
+- Revisar DeleteDateColumn o filtros deletedAt IS NULL.
+- Agregar proteccion CSRF para mutaciones autenticadas por cookie.
+- Validar Origin y Referer en produccion cuando corresponda.
+- Agregar rate limiting a login, refresh y logout.
+- Definir claramente access token, refresh token, cookie y logout.
+- Validar longitud y formato de correlation IDs.
+
+Criterios de aceptacion
+-----------------------
+- Un usuario de sucursal A no puede leer ni modificar datos de sucursal B.
+- Un usuario deshabilitado o eliminado no puede iniciar sesion.
+- Las respuestas publicas no contienen secretos.
+- Hay pruebas de autorizacion positiva, negativa y cross-branch.
+- Login y endpoints sensibles tienen rate limit y proteccion CSRF.
+
+
+FASE 3 - REGLAS DE NEGOCIO, ORDENES Y PAGOS
+============================================
+
+Objetivo
+--------
+Garantizar integridad financiera y transiciones validas.
+
+Ordenes
+-------
+- Centralizar calculo de subtotal, descuento, impuesto, total y balance.
+- Calcular total como subtotal - descuento + impuesto segun regla definida.
+- Impedir descuentos o impuestos negativos.
+- Impedir descuentos superiores al subtotal.
+- Recalcular una orden despues de crear, actualizar o eliminar detalles.
+- Usar decimal exacto, no aritmetica flotante JavaScript para dinero.
+- Definir precision y redondeo oficial.
+- Ejecutar cambios de orden y detalle dentro de transacciones.
+- Validar que servicios y sucursales pertenecen al contexto correcto.
+
+Pagos
+------
+- Definir estados y transiciones validas.
+- Recalcular balance al crear, editar, cancelar, confirmar o reembolsar.
+- Impedir pagos superiores al balance salvo regla explicita.
+- Registrar usuario, fecha, motivo y referencia de cada cambio.
+- Implementar idempotencia para evitar pagos duplicados.
+- Ejecutar pago y recalculo dentro de una transaccion.
+
+Criterios de aceptacion
+-----------------------
+- Los totales se mantienen correctos en todos los caminos.
+- No existen balances negativos no autorizados.
+- Un pago repetido no duplica cobros.
+- Las transiciones invalidas regresan 400/409 y no modifican datos.
+- Hay pruebas de descuentos, impuestos, reembolsos, redondeos y concurrencia.
+
+
+FASE 4 - DISPONIBILIDAD, CITAS Y ZONAS HORARIAS
+================================================
+
+Objetivo
+--------
+Evitar doble reserva y errores de horario.
+
+Tareas
+------
+- Encapsular disponibilidad y creacion de cita en una transaccion.
+- Revalidar disponibilidad dentro de la transaccion.
+- Agregar restriccion PostgreSQL para evitar solapamientos concurrentes.
+- Definir politica para citas canceladas, no-show y reprogramadas.
+- Usar la zona horaria de la sucursal al crear slots.
+- Convertir a UTC solo en almacenamiento y respuestas segun contrato.
+- Cubrir horario de verano y cambios de zona.
+- Completar CRUD de horas y bloques en frontend o retirar rutas sin uso.
+- Validar que agenda, profesional, servicio, sucursal y consultorio son
+  relaciones compatibles.
+
+Criterios de aceptacion
+-----------------------
+- Dos solicitudes concurrentes no reservan el mismo horario.
+- Los slots coinciden con la zona horaria configurada.
+- Las transiciones de cita son idempotentes y auditadas.
+- Existen pruebas de concurrencia y de cambio de horario de verano.
+
+
+FASE 5 - AUDITORIA Y DOCUMENTOS CLINICOS
+=========================================
+
+Objetivo
+--------
+Tener trazabilidad real y almacenamiento seguro de documentos.
+
+Auditoria
+---------
+- Crear un servicio/interceptor central de auditoria.
+- Registrar login, logout, refresh fallido y fallos de autorizacion.
+- Registrar altas, cambios, archivados, cancelaciones y reembolsos.
+- Registrar cambios de roles, permisos, sucursales y usuarios.
+- Registrar acceso y cambios de expedientes.
+- Registrar acceso, subida, descarga y eliminacion de documentos.
+- Guardar actor, sucursal, accion, modulo, entidad, entidadId, valores
+  anteriores, valores nuevos, IP y correlationId.
+- Evitar registrar tokens, hashes o datos clinicos innecesarios.
+- Hacer el endpoint de consulta paginado y filtrable.
+
+Documentos
+----------
+- Implementar multipart upload o integracion con almacenamiento controlado.
+- Validar MIME real, extension, tamano y nombre.
+- Usar almacenamiento privado y URLs firmadas.
+- Agregar antivirus o escaneo equivalente.
+- Verificar autorizacion por expediente y sucursal.
+- Evitar que el cliente elija libremente storageKey.
+- Implementar descarga segura y expiracion de URLs.
+
+Criterios de aceptacion
+-----------------------
+- Toda operacion sensible genera un registro verificable.
+- Un usuario no puede descargar documentos de otra sucursal.
+- Un storageKey invalido no crea un documento valido.
+- Los documentos no se sirven publicamente.
+
+
+FASE 6 - BASE DE DATOS, MIGRACIONES Y MODELO
+=============================================
+
+Objetivo
+--------
+Tener una unica fuente de verdad para el esquema.
+
+Tareas
+------
+- Decidir si la fuente de verdad es migracion, entidad o documentacion y
+  mantener las otras dos sincronizadas.
+- Corregir nombres de tablas actuales frente a database-model.md.
+- Corregir expectativas de primary keys y foreign keys.
+- Revisar auth_session frente a sessions.
+- Revisar audit_log frente a audit_logs.
+- Revisar nombres singulares/plurales en todas las entidades.
+- Ejecutar migraciones en una base limpia y en una base existente.
+- Revisar indices unicos y restricciones de integridad.
+- Agregar restricciones para estados, dinero, fechas y solapamientos.
+- Eliminar columnas o migraciones obsoletas solo con migracion segura.
+- Actualizar database-model.spec.ts para reflejar el esquema aprobado.
+
+Criterios de aceptacion
+-----------------------
+- `npm test` backend pasa completo.
+- `migration:show` no reporta migraciones pendientes inesperadas.
+- Una base limpia y una base actualizada producen el mismo modelo.
+- No se usa synchronize en ningun entorno.
+
+
+FASE 7 - VALIDACION FRONTEND Y EXPERIENCIA DE USUARIO
+======================================================
+
+Objetivo
+--------
+Hacer que la interfaz refleje permisos, estados y errores reales.
+
+Tareas
+------
+- Sustituir Record<string, unknown> por tipos y schemas por modulo.
+- Agregar Zod para pacientes, citas, consultas, recetas, ordenes, pagos,
+  precios y relaciones.
+- Validar rangos, fechas, cantidades, importes, longitudes y enums.
+- Aplicar permisos de escritura a todos los botones y formularios de detalle.
+- Deshabilitar acciones que no tienen endpoint backend.
+- Diferenciar estados loading, error, forbidden y empty.
+- Mostrar fallos de permisos y de carga de sucursales claramente.
+- Validar la sucursal guardada en localStorage contra las permitidas.
+- Resolver el limite actual de 100 sucursales o agregar busqueda paginada.
+- Mantener paginacion OFFSET consistente en listados principales.
+- Rechazar o implementar CURSOR; no tratarlo como pageCount 0.
+- Corregir accesibilidad de aria-current, dialog labels, teclado, overlays y
+  aria-live.
+- Revisar responsive en tablas, formularios, dashboard y modales.
+- Mantener eliminados laboratorio y farmacia del frontend.
+
+Criterios de aceptacion
+-----------------------
+- Ningun boton visible ejecuta una ruta inexistente.
+- Los permisos se reflejan igual en menu, ruta, pagina y mutacion.
+- Los errores de API muestran mensajes accionables.
+- Los formularios bloquean datos invalidos antes de enviar.
+- Auditoria de accesibilidad automatizada sin bloqueadores.
+
+
+FASE 8 - PRUEBAS AUTOMATIZADAS
+==============================
+
+Objetivo
+--------
+Verificar contratos y reglas sin depender de inspeccion manual.
+
+Backend
+-------
+- Corregir y completar database-model.spec.ts.
+- Agregar unit tests de servicios financieros.
+- Agregar tests de transiciones de estados.
+- Agregar tests de permisos y aislamiento por sucursal.
+- Agregar tests de no exposicion de secretos.
+- Agregar tests de auditoria.
+- Agregar tests de documentos y autorizacion.
+- Agregar tests de concurrencia de citas y pagos.
+- Agregar tests de fechas y zonas horarias.
+- Agregar E2E con PostgreSQL real.
+
+Frontend
+--------
+- Probar clientes API con MSW o equivalente.
+- Probar payloads y enums contra contratos backend.
+- Probar 401, refresh, 403, 404, 409 y 500.
+- Probar formularios y validaciones por modulo.
+- Probar permisos por accion.
+- Probar paginacion, filtros, estados vacios y errores.
+- Agregar pruebas de accesibilidad con axe.
+- Agregar pruebas de flujo completo para pacientes, citas, consultas,
+  recetas, ordenes, pagos y auditoria.
+
+CI
+--
+- Ejecutar install limpio.
+- Ejecutar typecheck, lint, tests, build y auditoria de dependencias.
+- Publicar artefactos y reportes de cobertura.
+- Bloquear merge si falla cualquier prueba critica.
+
+Criterios de aceptacion
+-----------------------
+- Backend y frontend pasan todas sus suites.
+- Cobertura de reglas criticas acordada y publicada.
+- Existen pruebas de integracion para cada flujo principal.
+- CI reproduce localmente los mismos resultados.
+
+
+FASE 9 - OBSERVABILIDAD Y OPERACION
+===================================
+
+Objetivo
+--------
+Detectar y diagnosticar problemas despues del despliegue.
+
+Tareas
+------
+- Estandarizar correlationId en frontend, backend y logs.
+- Configurar logs estructurados sin secretos ni datos clinicos sensibles.
+- Agregar metricas de latencia, errores, 401, 403, 404, 409 y 500.
+- Agregar metricas de consultas lentas y colas de subida de documentos.
+- Configurar health check de API y base de datos.
+- Configurar alertas de errores, sesiones, pagos y disponibilidad.
+- Definir backup automatico y prueba de restauracion.
+- Definir retencion de logs y auditoria.
+- Documentar rollback de despliegue y rollback de migracion.
+- Definir runbook para incidentes de pagos, citas, autenticacion y datos.
+
+Criterios de aceptacion
+-----------------------
+- Existe health check util para balanceador.
+- Se puede rastrear una peticion desde frontend hasta base de datos.
+- Se puede restaurar una base de datos en un entorno nuevo.
+- Hay alertas y procedimientos documentados.
+
+
+FASE 10 - PREPARACION PARA PRODUCCION
+=====================================
+
+Checklist tecnico
+-----------------
+- Variables de produccion validadas.
+- Secretos rotados y almacenados fuera del repositorio.
+- COOKIE_SECURE=true en HTTPS.
+- CORS limitado a dominios autorizados.
+- JWT secrets fuertes y distintos.
+- BCRYPT_SALT_ROUNDS configurado.
+- Rate limiting activo.
+- CSRF activo.
+- PostgreSQL con backups y migraciones aplicadas.
+- Logs sin secretos ni informacion clinica innecesaria.
+- Almacenamiento de documentos privado.
+- CI verde.
+- Tests E2E verdes.
+- Auditoria de seguridad completada.
+- Prueba de restauracion completada.
+- Plan de rollback aprobado.
+- Prueba de aceptacion de usuario completada.
+
+Pruebas finales obligatorias
+----------------------------
+- npm run typecheck
+- npm run lint
+- npm test
+- npm run build
+- npm run test:e2e
+- npm run test:cov
+- npm run migration:show
+- npm run migration:run en staging
+- npm audit
+- Pruebas manuales de login, sucursal, pacientes, agenda, consultas,
+  recetas, ordenes, pagos, documentos y auditoria.
+
+Criterio final de salida
+------------------------
+La plataforma solo se considera lista cuando:
+- No existen discrepancias conocidas entre frontend y backend.
+- Los flujos principales completan alta, consulta, modificacion y cierre.
+- Seguridad, sucursales, auditoria y documentos estan verificados.
+- La base de datos esta alineada y migrable.
+- Las pruebas automatizadas y E2E pasan.
+- La operacion cuenta con backups, monitoreo y rollback.
+
+
+ORDEN DE EJECUCION RECOMENDADO
+===============================
+
+1. Fase 0: linea base y entorno.
+2. Fase 1: contratos frontend/backend.
+3. Fase 2: seguridad y sucursales.
+4. Fase 3: ordenes y pagos.
+5. Fase 4: citas y zonas horarias.
+6. Fase 5: auditoria y documentos.
+7. Fase 6: base de datos y migraciones.
+8. Fase 7: validacion y UX.
+9. Fase 8: pruebas automatizadas y CI.
+10. Fase 9: observabilidad y operacion.
+11. Fase 10: salida a produccion.

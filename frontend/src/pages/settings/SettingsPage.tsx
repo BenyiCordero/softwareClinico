@@ -1,12 +1,5 @@
-import { SlidersHorizontal } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function SettingsPage() {
-  return (
-    <PagePlaceholder
-      title="Configuración"
-      icon={SlidersHorizontal}
-      description="Configuración general del sistema"
-    />
-  )
-}
+import { useAuth } from '@/app/providers/auth-context'
+import { getUserDisplayName } from '@/features/auth/auth.types'
+import { useBranch } from '@/app/providers/branch-context'
+import { Card, PageHeader, Badge } from '@/components/ui'
+export default function SettingsPage() { const { user } = useAuth(); const { branches, activeBranchId } = useBranch(); const branch = branches.find((item) => item.branchId === activeBranchId); return <div className="page-content"><PageHeader title="Configuración" description="Consulta la sesión, sucursal y permisos efectivos." /><div className="grid gap-5 lg:grid-cols-2"><Card className="p-6"><h2 className="text-lg font-semibold text-ink">Sesión actual</h2><dl className="mt-4 space-y-3 text-sm"><div className="flex justify-between gap-4"><dt className="text-ink-muted">Usuario</dt><dd className="font-medium text-ink">{user?.email ?? '-'}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-muted">Nombre</dt><dd className="font-medium text-ink">{user ? getUserDisplayName(user) : '-'}</dd></div><div className="flex justify-between gap-4"><dt className="text-ink-muted">Estado</dt><dd><Badge variant="success">Sesión activa</Badge></dd></div></dl></Card><Card className="p-6"><h2 className="text-lg font-semibold text-ink">Sucursal activa</h2><p className="mt-3 text-sm text-ink-muted">{branch?.name ?? 'Todas las sucursales'}</p><p className="mt-2 text-xs text-ink-muted">Cambia la sucursal desde el selector del encabezado.</p></Card></div></div> }

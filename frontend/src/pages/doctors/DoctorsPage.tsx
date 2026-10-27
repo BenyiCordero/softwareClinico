@@ -1,8 +1,2 @@
-import { BriefcaseMedical } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function DoctorsPage() {
-  return (
-    <PagePlaceholder title="Médicos" icon={BriefcaseMedical} description="Gestión de personal médico" />
-  )
-}
+import { Navigate } from 'react-router-dom'
+export default function DoctorsPage() { return <Navigate to="/dashboard/health-professionals" replace /> }

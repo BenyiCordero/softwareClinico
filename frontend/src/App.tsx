@@ -4,6 +4,7 @@ import { AuthProvider } from '@/app/providers/AuthProvider'
 import { BranchProvider } from '@/app/providers/BranchProvider'
 import QueryProvider from '@/app/providers/QueryProvider'
 import AppRoutes from '@/routes/AppRoutes'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default function App() {
   return (
@@ -12,7 +13,7 @@ export default function App() {
         <AuthProvider>
           <BranchProvider>
             <Toaster />
-            <AppRoutes />
+            <ErrorBoundary><AppRoutes /></ErrorBoundary>
           </BranchProvider>
         </AuthProvider>
       </BrowserRouter>

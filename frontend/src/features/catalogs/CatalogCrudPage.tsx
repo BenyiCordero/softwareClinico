@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import { useForm, type Resolver } from 'react-hook-form'
 import type { ZodTypeAny } from 'zod'
 import { useBranch } from '@/app/providers/branch-context'
-import { Alert, Badge, Button, ConfirmDialog, DataTable, Field, FilterBar, Input, Modal, PageHeader, Pagination, Select, toast } from '@/components/ui'
+import { Alert, Badge, Button, ConfirmDialog, DataTable, Field, FilterActions, FilterBar, Input, Modal, PageHeader, Pagination, RowActionsMenu, Select, toast } from '@/components/ui'
 import type { DataTableColumn } from '@/components/ui'
 import { ApiError } from '@/infrastructure/http'
 import type { CatalogListQuery, CatalogPage } from './catalog.types'
@@ -185,13 +185,16 @@ export default function CatalogCrudPage<TItem extends object>({ config }: { conf
     header: field.label,
     cell: (item) => field.name === 'status' ? <Badge variant={statusVariant(String((item as Record<string, unknown>)[field.name] ?? ''))} dot>{statusLabel(String((item as Record<string, unknown>)[field.name] ?? ''))}</Badge> : config.getCell(item, field.name),
   }))
+  const actionsFor = (item: TItem) => [
+    ...(config.extraActions ?? []).filter((action) => can(action.permission) && (action.when?.(item) ?? true)).map((action, index) => ({ label: action.label, disabled: runningAction !== null, onClick: async () => { setRunningAction(index); try { await action.execute(item); await queryClient.invalidateQueries({ queryKey: [config.queryKey] }); toast.success(`${action.label} correctamente.`) } catch (error) { toast.error(getErrorMessage(error)) } finally { setRunningAction(null) } } })),
+    ...(canUpdate ? [{ label: 'Editar', icon: Edit2, onClick: () => { setEditing(item); setFormError(null); setFormOpen(true) } }] : []),
+    ...(canArchive ? [{ label: 'Archivar', icon: Trash2, danger: true, onClick: () => setRemoving(item) }] : []),
+  ]
   columns.push({
     key: 'actions', header: 'Acciones', align: 'right', cell: (item) => (
       <div className="flex justify-end gap-1">
         {config.detailPath && <Link className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink-secondary hover:bg-line-light hover:text-ink" to={config.detailPath(item)} title="Administrar relaciones" aria-label="Administrar relaciones">↗</Link>}
-        {config.extraActions?.map((action, index) => can(action.permission) && (action.when?.(item) ?? true) && <Button key={action.label} variant="ghost" size="sm" loading={runningAction === index} disabled={runningAction !== null} onClick={async () => { setRunningAction(index); try { await action.execute(item); await queryClient.invalidateQueries({ queryKey: [config.queryKey] }); toast.success(`${action.label} correctamente.`) } catch (error) { toast.error(getErrorMessage(error)) } finally { setRunningAction(null) } }}>{action.label}</Button>)}
-        {canUpdate && <Button variant="ghost" size="icon" title="Editar" onClick={() => { setEditing(item); setFormError(null); setFormOpen(true) }}><Edit2 className="h-4 w-4" /></Button>}
-        {canArchive && <Button variant="ghost" size="icon" title="Archivar" onClick={() => setRemoving(item)}><Trash2 className="h-4 w-4 text-danger" /></Button>}
+        <RowActionsMenu items={actionsFor(item)} />
       </div>
     ),
   })
@@ -208,8 +211,7 @@ export default function CatalogCrudPage<TItem extends object>({ config }: { conf
               </Select>
             ) : <Input key={field} value={draftFilters[field] ?? ''} onChange={(event) => setDraftFilters((current) => ({ ...current, [field]: event.target.value }))} placeholder={`Filtrar por ${field}`} leading={<Search className="h-4 w-4" />} />
           ))}
-          <Button type="submit" leftIcon={<Search className="h-4 w-4" />}>Buscar</Button>
-          <Button type="button" variant="outline" onClick={() => { setDraftFilters({}); setFilterValues({}); setPage(1) }}>Limpiar</Button>
+           <FilterActions onClear={() => { setDraftFilters({}); setFilterValues({}); setPage(1) }} />
         </FilterBar>
       </form>
       {query.isError && <Alert variant="danger" title={`No se pudo cargar ${config.title.toLowerCase()}`} className="mb-5"><div className="flex flex-wrap items-center justify-between gap-3"><span>{getErrorMessage(query.error)}</span><Button variant="outline" size="sm" onClick={() => void query.refetch()} leftIcon={<RefreshCw className="h-3.5 w-3.5" />}>Reintentar</Button></div></Alert>}

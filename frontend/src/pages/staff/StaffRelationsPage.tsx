@@ -19,19 +19,21 @@ function RelationLayout({ title, description, backPath, children }: { title: str
 export function EmployeeAssignmentsPage() {
   const id = Number(useParams().id)
   const { can } = useBranch()
+  const canUpdate = can('employees.update')
   const client = useQueryClient()
   const query = useQuery({ queryKey: ['employee-assignments', id], queryFn: () => employeesApi.assignments(id), enabled: can('employees.read') && id > 0 })
   const mutation = useMutation({ mutationFn: (form: HTMLFormElement) => employeesApi.assign(id, { branchId: numberValue(form, 'branchId'), areaId: value(form, 'areaId'), positionId: numberValue(form, 'positionId'), assignmentType: value(form, 'assignmentType'), startDate: value(form, 'startDate') }), onSuccess: () => { void client.invalidateQueries({ queryKey: ['employee-assignments', id] }); toast.success('Asignación creada.') } })
   const end = useMutation({ mutationFn: ({ employeeAssignmentId }: EmployeeAssignment) => employeesApi.endAssignment(id, employeeAssignmentId, {}), onSuccess: () => { void client.invalidateQueries({ queryKey: ['employee-assignments', id] }); toast.success('Asignación finalizada.') } })
-  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); mutation.mutate(event.currentTarget) }
+  const submit = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); if (canUpdate) mutation.mutate(event.currentTarget) }
   const columns: DataTableColumn<EmployeeAssignment>[] = [
-    { key: 'branchId', header: 'Sucursal', cell: (item) => item.branchId }, { key: 'areaId', header: 'Área', cell: (item) => item.areaId ?? '-' }, { key: 'positionId', header: 'Puesto', cell: (item) => item.positionId }, { key: 'assignmentType', header: 'Tipo', cell: (item) => item.assignmentType }, { key: 'status', header: 'Estado', cell: (item) => <Badge variant={item.status === 'ACTIVE' ? 'success' : 'neutral'}>{item.status}</Badge> }, { key: 'actions', header: '', align: 'right', cell: (item) => item.status === 'ACTIVE' && <Button variant="ghost" size="icon" title="Finalizar" onClick={() => end.mutate(item)}><Trash2 className="h-4 w-4 text-danger" /></Button> },
+    { key: 'branchId', header: 'Sucursal', cell: (item) => item.branchId }, { key: 'areaId', header: 'Área', cell: (item) => item.areaId ?? '-' }, { key: 'positionId', header: 'Puesto', cell: (item) => item.positionId }, { key: 'assignmentType', header: 'Tipo', cell: (item) => item.assignmentType }, { key: 'status', header: 'Estado', cell: (item) => <Badge variant={item.status === 'ACTIVE' ? 'success' : 'neutral'}>{item.status}</Badge> }, { key: 'actions', header: '', align: 'right', cell: (item) => item.status === 'ACTIVE' && <Button variant="ghost" size="icon" title="Finalizar" aria-label="Finalizar asignación" onClick={() => end.mutate(item)}><Trash2 className="h-4 w-4 text-danger" /></Button> },
   ]
   return <RelationLayout title="Asignaciones del empleado" description="Administra sucursal, área y puesto del empleado." backPath="/dashboard/employees"><div className="panel-card mb-5 p-5"><form className="grid gap-4 sm:grid-cols-5" onSubmit={submit}><Field label="Sucursal" htmlFor="branchId" required><Input id="branchId" name="branchId" type="number" required /></Field><Field label="Área" htmlFor="areaId"><Input id="areaId" name="areaId" type="number" /></Field><Field label="Puesto" htmlFor="positionId" required><Input id="positionId" name="positionId" type="number" required /></Field><Field label="Tipo" htmlFor="assignmentType" required><Select id="assignmentType" name="assignmentType" defaultValue="PRIMARY"><option value="PRIMARY">Principal</option><option value="SECONDARY">Secundaria</option><option value="TEMPORARY">Temporal</option></Select></Field><Field label="Inicio" htmlFor="startDate" required><Input id="startDate" name="startDate" type="date" required /></Field><Button type="submit" loading={mutation.isPending} leftIcon={<Plus className="h-4 w-4" />}>Asignar</Button></form>{mutation.isError && <Alert className="mt-4" variant="danger" title="No se pudo asignar">{errorText(mutation.error)}</Alert>}</div><div className="panel-card overflow-hidden"><DataTable columns={columns} data={query.data ?? []} keyExtractor={(item) => item.employeeAssignmentId} loading={query.isLoading} emptyTitle="Sin asignaciones" emptyDescription="Este empleado aún no tiene asignaciones." /></div></RelationLayout>
 }
 
 export function ProfessionalSpecialtiesPage() {
-  const id = Number(useParams().id); const { can } = useBranch(); const client = useQueryClient()
+  const id = Number(useParams().id); const { can } = useBranch(); const canUpdate = can('health-professionals.update'); const client = useQueryClient()
+  void canUpdate
   const query = useQuery({ queryKey: ['professional-specialties', id], queryFn: () => healthProfessionalsApi.specialties(id), enabled: can('health-professionals.read') && id > 0 })
   const mutation = useMutation({ mutationFn: (form: HTMLFormElement) => healthProfessionalsApi.assignSpecialty(id, { specialtyId: numberValue(form, 'specialtyId'), priority: value(form, 'priority') }), onSuccess: () => { void client.invalidateQueries({ queryKey: ['professional-specialties', id] }); toast.success('Especialidad asignada.') } })
   const remove = useMutation({ mutationFn: (item: ProfessionalSpecialty) => healthProfessionalsApi.removeSpecialty(id, item.professionalSpecialtyId), onSuccess: () => { void client.invalidateQueries({ queryKey: ['professional-specialties', id] }); toast.success('Especialidad retirada.') } })
@@ -40,7 +42,8 @@ export function ProfessionalSpecialtiesPage() {
 }
 
 export function ServiceRelationshipsPage() {
-  const id = Number(useParams().id); const client = useQueryClient(); const [tab, setTab] = useState<'requirements' | 'assignments'>('requirements')
+  const id = Number(useParams().id); const { can } = useBranch(); const canUpdate = can('services.update'); const client = useQueryClient(); const [tab, setTab] = useState<'requirements' | 'assignments'>('requirements')
+  void canUpdate
   const requirements = useQuery({ queryKey: ['service-requirements', id], queryFn: () => servicesApi.requirements(id), enabled: id > 0 && tab === 'requirements' })
   const assignments = useQuery({ queryKey: ['service-assignments', id], queryFn: () => servicesApi.assignments(id), enabled: id > 0 && tab === 'assignments' })
   const addRequirement = useMutation({ mutationFn: (form: HTMLFormElement) => servicesApi.createRequirement(id, { name: value(form, 'name'), description: value(form, 'description'), requirementLevel: value(form, 'requirementLevel'), sortOrder: numberValue(form, 'sortOrder') }), onSuccess: () => { void client.invalidateQueries({ queryKey: ['service-requirements', id] }); toast.success('Requisito creado.') } })

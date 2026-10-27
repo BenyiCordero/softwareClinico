@@ -29,6 +29,7 @@ export const ConfirmDialog = ({
       onClose={onClose}
       size="sm"
       hideClose
+      ariaLabel={title}
       closeOnBackdrop={!loading}
       footer={
         <>

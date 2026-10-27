@@ -1,8 +1,8 @@
-import { Receipt } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function BillingPage() {
-  return (
-    <PagePlaceholder title="Facturación" icon={Receipt} description="Facturación de servicios médicos" />
-  )
-}
+import CatalogCrudPage, { type CatalogCrudConfig } from '@/features/catalogs/CatalogCrudPage'
+import { billingApi } from '@/features/billing/billing.api'
+import { orderSchema } from '@/features/billing/billing.schemas'
+import type { Order } from '@/features/billing/billing.models'
+const cell = (item: object, field: string) => String((item as Record<string, unknown>)[field] ?? '-')
+const statuses = [{ value: 'DRAFT', label: 'Borrador' }, { value: 'PENDING_PAYMENT', label: 'Pendiente de pago' }, { value: 'PARTIALLY_PAID', label: 'Pago parcial' }, { value: 'PAID', label: 'Pagada' }, { value: 'CANCELLED', label: 'Cancelada' }, { value: 'REFUNDED', label: 'Reembolsada' }]
+const config: CatalogCrudConfig<Order> = { queryKey: 'orders', title: 'Facturación', description: 'Administra órdenes, totales, pagos y saldos.', endpoint: '/orders', idField: 'orderId', filterFields: ['name', 'status'], filterStatusOptions: statuses, fields: [{ name: 'patientId', label: 'ID de paciente', required: true, type: 'number' }, { name: 'branchId', label: 'ID de sucursal', required: true, type: 'number' }, { name: 'appointmentId', label: 'ID de cita', type: 'number' }, { name: 'consultationId', label: 'ID de consulta', type: 'number' }, { name: 'folio', label: 'Folio' }, { name: 'subtotal', label: 'Subtotal' }, { name: 'discount', label: 'Descuento' }, { name: 'tax', label: 'Impuesto' }, { name: 'total', label: 'Total' }, { name: 'balance', label: 'Saldo' }, { name: 'status', label: 'Estado', required: true, options: statuses }], schema: orderSchema, defaultValues: { patientId: '', branchId: '', appointmentId: '', consultationId: '', folio: '', subtotal: '', discount: '0.00', tax: '0.00', total: '', balance: '', status: 'DRAFT' }, permissions: { read: 'orders.read', create: 'orders.create', update: 'orders.update', archive: 'orders.archive' }, list: billingApi.orders.list, create: billingApi.orders.create, update: billingApi.orders.update, remove: async () => undefined, getId: (item) => item.orderId, getCell: cell, detailPath: (item) => `/dashboard/billing/${item.orderId}`, toCreateInput: (values) => ({ patientId: Number(values.patientId), branchId: Number(values.branchId), appointmentId: values.appointmentId ? Number(values.appointmentId) : undefined, consultationId: values.consultationId ? Number(values.consultationId) : undefined }), toUpdateInput: (values) => ({ status: values.status }) }
+export default function BillingPage() { return <CatalogCrudPage config={config} /> }

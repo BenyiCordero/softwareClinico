@@ -17,6 +17,9 @@ export interface SearchableSelectProps {
   disabled?: boolean
   error?: boolean
   className?: string
+  id?: string
+  name?: string
+  'aria-label'?: string
 }
 
 export const SearchableSelect = ({
@@ -28,6 +31,9 @@ export const SearchableSelect = ({
   disabled = false,
   error = false,
   className,
+  id,
+  name,
+  'aria-label': ariaLabel,
 }: SearchableSelectProps) => {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -73,8 +79,12 @@ export const SearchableSelect = ({
         <input
           ref={inputRef}
           type="text"
+          id={id}
+          name={name}
           role="combobox"
           aria-expanded={open}
+          aria-controls={id ? `${id}-options` : undefined}
+          aria-label={ariaLabel}
           disabled={disabled}
           readOnly={!open}
           value={open ? query : selected?.label ?? ''}
@@ -84,6 +94,10 @@ export const SearchableSelect = ({
             setQuery('')
           }}
           onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') setOpen(false)
+            if (event.key === 'Enter' && filtered[0]) { event.preventDefault(); handleSelect(filtered[0]) }
+          }}
           className="h-full w-full cursor-pointer rounded-lg border-none bg-transparent pl-9 pr-9 text-sm text-ink outline-none placeholder:text-ink-muted disabled:cursor-not-allowed disabled:bg-transparent"
         />
         <ChevronDown
@@ -95,7 +109,7 @@ export const SearchableSelect = ({
       </div>
 
       {open && !disabled && (
-        <div className="animate-fade-in absolute left-0 right-0 top-full z-[60] mt-2 max-h-[220px] overflow-y-auto rounded-lg border-[1.5px] border-line bg-surface shadow-md">
+        <div id={id ? `${id}-options` : undefined} role="listbox" className="animate-fade-in absolute left-0 right-0 top-full z-[60] mt-2 max-h-[220px] overflow-y-auto rounded-lg border-[1.5px] border-line bg-surface shadow-md">
           {filtered.length === 0 && (
             <div className="px-3 py-3 text-sm italic text-ink-muted">{emptyText}</div>
           )}
@@ -106,6 +120,8 @@ export const SearchableSelect = ({
               <button
                 key={option.value}
                 type="button"
+                role="option"
+                aria-selected={isSelected}
                 disabled={isDisabled}
                 onMouseDown={(event) => {
                   event.preventDefault()

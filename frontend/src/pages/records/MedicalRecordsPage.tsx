@@ -1,12 +1,8 @@
-import { ClipboardList } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function MedicalRecordsPage() {
-  return (
-    <PagePlaceholder
-      title="Expedientes"
-      icon={ClipboardList}
-      description="Expedientes clínicos de los pacientes"
-    />
-  )
-}
+import CatalogCrudPage, { type CatalogCrudConfig } from '@/features/catalogs/CatalogCrudPage'
+import { clinicalApi } from '@/features/clinical/clinical.api'
+import { clinicalRecordSchema } from '@/features/clinical/clinical.schemas'
+import type { ClinicalRecord } from '@/features/clinical/clinical.models'
+const cell = (item: object, field: string) => String((item as Record<string, unknown>)[field] ?? '-')
+const statuses = [{ value: 'OPEN', label: 'Abierto' }, { value: 'RESTRICTED', label: 'Restringido' }, { value: 'CLOSED', label: 'Cerrado' }, { value: 'ARCHIVED', label: 'Archivado' }]
+const config: CatalogCrudConfig<ClinicalRecord> = { queryKey: 'clinical-records', title: 'Expedientes clínicos', description: 'Administra expedientes y controla su estado de acceso.', endpoint: '/clinical-records', idField: 'clinicalRecordId', filterFields: ['name', 'status'], filterStatusOptions: statuses, fields: [{ name: 'patientId', label: 'ID de paciente', required: true, type: 'number' }, { name: 'recordNumber', label: 'Número de expediente', required: true }, { name: 'openedAt', label: 'Apertura', type: 'date' }, { name: 'status', label: 'Estado', required: true, options: statuses }], schema: clinicalRecordSchema, defaultValues: { patientId: '', recordNumber: '', openedAt: '', status: 'OPEN' }, permissions: { read: 'clinical-records.read', create: 'clinical-records.create', update: 'clinical-records.update', archive: 'clinical-records.archive' }, list: clinicalApi.records.list, create: clinicalApi.records.create, update: clinicalApi.records.update, remove: clinicalApi.records.remove, getId: (item) => item.clinicalRecordId, getCell: cell, toCreateInput: (values) => ({ ...values, patientId: Number(values.patientId) }), toUpdateInput: (values) => ({ ...values }) }
+export default function MedicalRecordsPage() { return <CatalogCrudPage config={config} /> }

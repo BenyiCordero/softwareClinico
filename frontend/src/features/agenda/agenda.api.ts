@@ -11,7 +11,7 @@ export const agendaApi = {
     remove: (id: number) => apiRequest<void>({ method: 'DELETE', url: `/schedules/${id}` }),
     hours: (id: number) => apiRequest<ScheduleHour[]>({ method: 'GET', url: `/schedules/${id}/hours` }),
   },
-  availability: (query: Record<string, unknown>) => apiRequest<AvailabilitySlot[]>({ method: 'GET', url: '/availability', params: query }),
+  availability: (scheduleId: number, query: { date: string }) => apiRequest<AvailabilitySlot[]>({ method: 'GET', url: `/schedules/${scheduleId}/availability`, params: query }),
   appointments: {
     list: (query: CatalogListQuery) => apiRequestPage<Appointment>({ method: 'GET', url: '/appointments', params: query }),
     create: (input: Record<string, unknown>) => apiRequest<Appointment>({ method: 'POST', url: '/appointments', data: numeric(compact(input), 'patientId', 'scheduleId', 'healthProfessionalId', 'serviceId', 'branchId', 'consultingRoomId') }),

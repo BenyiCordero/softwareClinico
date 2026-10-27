@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationEnum } from '../common/pagination/enum/pagination.enum';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
+import { OffsetPaginatedResult } from '../common/pagination/interface/offset-paginated-result.interface';
 import { Consultation } from '../module-consultation/entity/consultation.entity';
 import { HealthProfessional } from '../module-health-professional/entity/health-professional.entity';
 import { Prescription } from './entity/prescription.entity';
@@ -22,11 +25,30 @@ export class PrescriptionService {
     @InjectRepository(HealthProfessional)
     private professionals: Repository<HealthProfessional>,
   ) {}
-  async findAll() {
-    return this.prescriptions.find({
+  async findAll(
+    query: OffsetPaginationQueryDto = {},
+  ): Promise<OffsetPaginatedResult<Prescription>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
+    const [data, totalItems] = await this.prescriptions.findAndCount({
       relations: { consultation: true, healthProfessional: true },
       order: { prescriptionId: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
+    const totalPages = Math.ceil(totalItems / limit);
+    return {
+      data,
+      pagination: {
+        type: PaginationEnum.OFFSET,
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
   async findOne(id: number) {
     const item = await this.prescriptions.findOne({

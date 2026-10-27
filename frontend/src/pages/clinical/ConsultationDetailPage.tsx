@@ -1,0 +1,38 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState, type FormEvent } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { Plus } from 'lucide-react'
+import { useCan } from '@/app/providers/branch-context'
+import { Button, DataTable, Field, Input, PageHeader, Select, Tabs, type DataTableColumn } from '@/components/ui'
+import { clinicalApi } from '@/features/clinical/clinical.api'
+import type { ClinicalDocument, ClinicalNote, Diagnosis, Treatment } from '@/features/clinical/clinical.models'
+
+const submitValue = (event: FormEvent<HTMLFormElement>, keys: string[]) => {
+  const data = Object.fromEntries(new FormData(event.currentTarget))
+  return Object.fromEntries(keys.map((key) => [key, data[key] ?? '']))
+}
+
+export default function ConsultationDetailPage() {
+  const id = Number(useParams().id)
+  const client = useQueryClient()
+  const [tab, setTab] = useState('diagnoses')
+  const diagnoses = useQuery({ queryKey: ['consultation-diagnoses', id], queryFn: () => clinicalApi.consultations.diagnoses(id), enabled: id > 0 && tab === 'diagnoses' })
+  const treatments = useQuery({ queryKey: ['consultation-treatments', id], queryFn: () => clinicalApi.consultations.treatments(id), enabled: id > 0 && tab === 'treatments' })
+  const notes = useQuery({ queryKey: ['consultation-notes', id], queryFn: () => clinicalApi.consultations.notes(id), enabled: id > 0 && tab === 'notes' })
+  const documents = useQuery({ queryKey: ['consultation-documents', id], queryFn: () => clinicalApi.consultations.documents(id), enabled: id > 0 && tab === 'documents' })
+  const addDiagnosis = useMutation({ mutationFn: (input: Record<string, unknown>) => clinicalApi.consultations.createDiagnosis(id, input), onSuccess: () => client.invalidateQueries({ queryKey: ['consultation-diagnoses', id] }) })
+  const addTreatment = useMutation({ mutationFn: (input: Record<string, unknown>) => clinicalApi.consultations.createTreatment(id, input), onSuccess: () => client.invalidateQueries({ queryKey: ['consultation-treatments', id] }) })
+  const addNote = useMutation({ mutationFn: (input: Record<string, unknown>) => clinicalApi.consultations.createNote(id, input), onSuccess: () => client.invalidateQueries({ queryKey: ['consultation-notes', id] }) })
+
+  const diagnosisColumns: DataTableColumn<Diagnosis>[] = [{ key: 'code', header: 'Código', cell: (item) => item.code ?? '-' }, { key: 'description', header: 'Descripción', cell: (item) => item.description }, { key: 'diagnosisType', header: 'Tipo', cell: (item) => item.diagnosisType }, { key: 'priority', header: 'Prioridad', cell: (item) => item.priority }]
+  const treatmentColumns: DataTableColumn<Treatment>[] = [{ key: 'name', header: 'Tratamiento', cell: (item) => item.name }, { key: 'description', header: 'Descripción', cell: (item) => item.description }, { key: 'instructions', header: 'Indicaciones', cell: (item) => item.instructions }, { key: 'status', header: 'Estado', cell: (item) => item.status }]
+  const noteColumns: DataTableColumn<ClinicalNote>[] = [{ key: 'noteType', header: 'Tipo', cell: (item) => item.noteType }, { key: 'content', header: 'Contenido', cell: (item) => item.content }, { key: 'status', header: 'Estado', cell: (item) => item.status }]
+  const documentColumns: DataTableColumn<ClinicalDocument>[] = [{ key: 'fileName', header: 'Archivo', cell: (item) => item.fileName }, { key: 'documentType', header: 'Tipo', cell: (item) => item.documentType }, { key: 'mimeType', header: 'Formato', cell: (item) => item.mimeType }, { key: 'status', header: 'Estado', cell: (item) => item.status }]
+
+  return <div className="page-content"><PageHeader title="Detalle de consulta" description="Diagnósticos, tratamientos, notas y documentos clínicos." actions={<Link className="inline-flex h-9 items-center rounded-lg border border-line px-4 text-sm" to="/dashboard/consultations">Volver</Link>} /><Tabs tabs={[{ value: 'diagnoses', label: 'Diagnósticos' }, { value: 'treatments', label: 'Tratamientos' }, { value: 'notes', label: 'Notas clínicas' }, { value: 'documents', label: 'Documentos' }]} value={tab} onChange={setTab} /><div className="mt-5">{tab === 'diagnoses' && <RelationPanel permission="consultations.update" title="Diagnósticos" fields={[['description', 'Descripción'], ['code', 'Código']]} select={['diagnosisType', 'Tipo', ['PRESUMPTIVE', 'Presuntivo', 'CONFIRMED', 'Confirmado', 'DIFFERENTIAL', 'Diferencial']]} onSubmit={(event) => { event.preventDefault(); addDiagnosis.mutate({ ...submitValue(event, ['description', 'code', 'diagnosisType', 'priority']), notes: '' }) }} data={diagnoses.data ?? []} columns={diagnosisColumns} loading={diagnoses.isLoading} />}{tab === 'treatments' && <RelationPanel permission="consultations.update" title="Tratamientos" fields={[['name', 'Nombre'], ['description', 'Descripción'], ['instructions', 'Indicaciones'], ['startDate', 'Inicio'], ['endDate', 'Fin']]} onSubmit={(event) => { event.preventDefault(); addTreatment.mutate(submitValue(event, ['name', 'description', 'instructions', 'startDate', 'endDate', 'status'])) }} data={treatments.data ?? []} columns={treatmentColumns} loading={treatments.isLoading} />}{tab === 'notes' && <RelationPanel permission="consultations.update" title="Notas clínicas" fields={[['healthProfessionalId', 'ID de profesional'], ['content', 'Contenido']]} select={['noteType', 'Tipo', ['EVOLUTION', 'Evolución', 'PROGRESS', 'Progreso', 'OTHER', 'Otra']]} onSubmit={(event) => { event.preventDefault(); const input = submitValue(event, ['healthProfessionalId', 'content', 'noteType']); addNote.mutate({ ...input, healthProfessionalId: Number(input.healthProfessionalId) }) }} data={notes.data ?? []} columns={noteColumns} loading={notes.isLoading} />}{tab === 'documents' && <div className="panel-card overflow-hidden"><DataTable columns={documentColumns} data={documents.data ?? []} keyExtractor={(item) => item.clinicalDocumentId} loading={documents.isLoading} emptyTitle="Sin documentos" emptyDescription="No hay documentos asociados." /></div>}</div></div>
+}
+
+function RelationPanel<T extends object>({ permission, title, fields, select, onSubmit, data, columns, loading }: { permission: string; title: string; fields: Array<[string, string]>; select?: [string, string, string[]]; onSubmit: (event: FormEvent<HTMLFormElement>) => void; data: T[]; columns: DataTableColumn<T>[]; loading: boolean }) {
+  const canCreate = useCan(permission)
+  return <><div className="panel-card mb-5 p-5"><h2 className="mb-4 text-lg font-semibold text-ink">{title}</h2><form className="flex flex-wrap items-end gap-4" onSubmit={canCreate ? onSubmit : (event) => event.preventDefault()}>{fields.map(([name, label]) => <Field key={name} label={label} htmlFor={`clinical-${name}`} required><Input id={`clinical-${name}`} name={name} required disabled={!canCreate} /></Field>)}{select && <Field label={select[1]} htmlFor={`clinical-${select[0]}`} required><Select id={`clinical-${select[0]}`} name={select[0]} defaultValue={select[2][0]} disabled={!canCreate}>{Array.from({ length: Math.floor(select[2].length / 2) }, (_, index) => <option key={select[2][index * 2]} value={select[2][index * 2]}>{select[2][index * 2 + 1]}</option>)}</Select></Field>}<Button type="submit" disabled={!canCreate} leftIcon={<Plus className="h-4 w-4" />}>Agregar</Button></form></div><div className="panel-card overflow-hidden"><DataTable columns={columns} data={data} keyExtractor={(item) => Number((item as Record<string, unknown>)[Object.keys(item as object).find((key) => key.endsWith('Id')) ?? 'id'])} loading={loading} emptyTitle={`Sin ${title.toLowerCase()}`} emptyDescription="No hay registros asociados." /></div></>
+}
