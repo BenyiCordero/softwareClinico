@@ -4,12 +4,13 @@ import { cn } from '@/lib/cn'
 
 export interface SelectProps extends ComponentPropsWithoutRef<'select'> {
   error?: boolean
+  wrapperClassName?: string
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, error = false, children, ...props }, ref) => {
+  ({ className, wrapperClassName, error = false, children, ...props }, ref) => {
     return (
-      <div className={cn('relative w-full', className)}>
+      <div className={cn('relative w-full', wrapperClassName)}>
         <select
           ref={ref}
           className={cn(
@@ -20,6 +21,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               : 'border-line focus:border-primary focus:ring-primary/15',
             className,
           )}
+          aria-invalid={error || undefined}
           {...props}
         >
           {children}

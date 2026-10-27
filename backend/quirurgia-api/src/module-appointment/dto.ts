@@ -8,6 +8,7 @@ import {
   Length,
   Min,
 } from 'class-validator';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
 
 export class CreateAppointmentDto {
   @Type(() => Number) @IsInt() @Min(1) patientId: number;
@@ -28,7 +29,7 @@ export class RescheduleAppointmentDto {
   @IsString() @Length(2, 500) reason: string;
 }
 
-export class FindAppointmentQueryDto {
+export class FindAppointmentQueryDto extends OffsetPaginationQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) patientId?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) scheduleId?: number;
   @IsOptional() @IsDateString() from?: string;

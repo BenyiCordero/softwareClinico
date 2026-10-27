@@ -1,12 +1,2 @@
-import { Stethoscope } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function NewVisitPage() {
-  return (
-    <PagePlaceholder
-      title="Nueva Consulta"
-      icon={Stethoscope}
-      description="Registro de una nueva consulta médica"
-    />
-  )
-}
+import { Navigate } from 'react-router-dom'
+export default function NewVisitPage() { return <Navigate to="/dashboard/consultations" replace /> }

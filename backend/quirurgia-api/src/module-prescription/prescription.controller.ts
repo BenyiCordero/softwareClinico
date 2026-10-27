@@ -9,10 +9,12 @@ import {
   Post,
   HttpCode,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
 import { PrescriptionService } from './prescription.service';
 import {
   CreatePrescriptionDto,
@@ -23,8 +25,10 @@ import {
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class PrescriptionController {
   constructor(private service: PrescriptionService) {}
-  @Get() @RequirePermissions('prescriptions.read') findAll() {
-    return this.service.findAll();
+  @Get() @RequirePermissions('prescriptions.read') findAll(
+    @Query() query: OffsetPaginationQueryDto,
+  ) {
+    return this.service.findAll(query);
   }
   @Get(':id') @RequirePermissions('prescriptions.read') findOne(
     @Param('id', ParseIntPipe) id: number,

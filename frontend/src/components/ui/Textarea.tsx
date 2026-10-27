@@ -16,8 +16,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           error
             ? 'border-danger focus:border-danger focus:ring-danger/15'
             : 'border-line focus:border-primary focus:ring-primary/15',
-          className,
-        )}
+           className,
+         )}
+         aria-invalid={error || undefined}
         {...props}
       />
     )

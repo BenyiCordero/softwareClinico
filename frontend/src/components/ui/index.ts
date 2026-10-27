@@ -23,9 +23,11 @@ export {
 } from './DataTable'
 export { PageHeader, type PageHeaderProps } from './PageHeader'
 export { FilterBar, type FilterBarProps } from './FilterBar'
+export { FilterActions } from './FilterActions'
 export { StatCard, type StatCardProps, type StatCardVariant } from './StatCard'
 export { Tabs, type TabsProps, type TabItem } from './Tabs'
 export { Alert, type AlertProps, type AlertVariant } from './Alert'
+export { QueryError } from './QueryError'
 export { Avatar, type AvatarProps, type AvatarSize } from './Avatar'
 export { Tooltip, type TooltipProps } from './Tooltip'
 
@@ -39,6 +41,7 @@ export {
   DropdownMenu,
   type DropdownMenuItem,
 } from './DropdownMenu'
+export { RowActionsMenu, type RowActionsMenuProps } from './RowActionsMenu'
 export {
   SearchableSelect,
   type SearchableSelectProps,

@@ -1,6 +1,8 @@
-import { Syringe } from 'lucide-react'
-import PagePlaceholder from '@/components/PagePlaceholder'
-
-export default function PrescriptionsPage() {
-  return <PagePlaceholder title="Recetas" icon={Syringe} description="Gestión de recetas médicas" />
-}
+import CatalogCrudPage, { type CatalogCrudConfig } from '@/features/catalogs/CatalogCrudPage'
+import { prescriptionsApi } from '@/features/prescriptions/prescription.api'
+import { prescriptionSchema } from '@/features/prescriptions/prescription.schemas'
+import type { Prescription } from '@/features/prescriptions/prescription.models'
+const cell = (item: object, field: string) => String((item as Record<string, unknown>)[field] ?? '-')
+const statuses = [{ value: 'ACTIVE', label: 'Activa' }, { value: 'COMPLETED', label: 'Completada' }, { value: 'CANCELLED', label: 'Cancelada' }, { value: 'EXPIRED', label: 'Expirada' }]
+const config: CatalogCrudConfig<Prescription> = { queryKey: 'prescriptions', title: 'Recetas', description: 'Administra recetas médicas y sus indicaciones.', endpoint: '/prescriptions', idField: 'prescriptionId', filterFields: ['status'], filterStatusOptions: statuses, fields: [{ name: 'consultationId', label: 'ID de consulta', required: true, type: 'number' }, { name: 'healthProfessionalId', label: 'ID de profesional', required: true, type: 'number' }, { name: 'issuedAt', label: 'Fecha de emisión', type: 'date' }, { name: 'notes', label: 'Notas' }, { name: 'status', label: 'Estado', required: true, options: statuses }], schema: prescriptionSchema, defaultValues: { consultationId: '', healthProfessionalId: '', issuedAt: '', notes: '', status: 'ACTIVE' }, permissions: { read: 'prescriptions.read', create: 'prescriptions.create', update: 'prescriptions.update' }, list: prescriptionsApi.list, create: prescriptionsApi.create, update: prescriptionsApi.update, remove: async () => undefined, getId: (item) => item.prescriptionId, getCell: cell, detailPath: (item) => `/dashboard/prescriptions/${item.prescriptionId}/items`, toCreateInput: (values) => ({ ...values, consultationId: Number(values.consultationId), healthProfessionalId: Number(values.healthProfessionalId) }), toUpdateInput: (values) => ({ ...values }) }
+export default function PrescriptionsPage() { return <CatalogCrudPage config={config} /> }

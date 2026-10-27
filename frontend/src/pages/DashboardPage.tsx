@@ -1,22 +1,12 @@
-import { HeartPulse } from 'lucide-react'
-import { Card, PageHeader } from '@/components/ui'
-
+import { useQuery } from '@tanstack/react-query'
+import { Activity, CalendarCheck, CircleDollarSign, Users } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Button, Card, PageHeader, QueryError, StatCard } from '@/components/ui'
+import { useBranch } from '@/app/providers/branch-context'
+import { dashboardApi } from '@/features/dashboard/dashboard.api'
+const total = (data: { pagination?: unknown } | undefined) => { const pagination = data?.pagination; return pagination && typeof pagination === 'object' && 'type' in pagination && pagination.type === 'OFFSET' && 'totalItems' in pagination && typeof pagination.totalItems === 'number' ? pagination.totalItems : 0 }
 export default function DashboardPage() {
-  return (
-    <div className="page-content">
-      <PageHeader
-        title="Bienvenido al Sistema"
-        description="Selecciona un módulo en el menú lateral para comenzar"
-      />
-      <div className="flex items-center justify-center py-16">
-        <Card className="w-full max-w-md p-8 text-center">
-          <div className="bg-primary-light text-primary mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl">
-            <HeartPulse className="h-8 w-8" />
-          </div>
-          <h2 className="text-ink text-xl font-bold">Bienvenido al Sistema</h2>
-          <p className="text-ink-muted mt-1 text-sm">Selecciona un módulo en el menú lateral para comenzar</p>
-        </Card>
-      </div>
-    </div>
-  )
+  const navigate = useNavigate(); const { can } = useBranch(); const today = new Date().toISOString().slice(0, 10)
+  const appointments = useQuery({ queryKey: ['dashboard', 'appointments', today], queryFn: () => dashboardApi.count('appointments', { page: 1, limit: 1, startDate: today, endDate: today }), enabled: can('appointments.read') }); const patients = useQuery({ queryKey: ['dashboard', 'patients'], queryFn: () => dashboardApi.count('patients', { page: 1, limit: 1 }), enabled: can('patients.read') }); const professionals = useQuery({ queryKey: ['dashboard', 'professionals'], queryFn: () => dashboardApi.count('health-professionals', { page: 1, limit: 1 }), enabled: can('health-professionals.read') }); const orders = useQuery({ queryKey: ['dashboard', 'orders'], queryFn: () => dashboardApi.count('orders', { page: 1, limit: 1 }), enabled: can('orders.read') }); const queries = [appointments, patients, professionals, orders]; const hasError = queries.some((query) => query.isError); const isLoading = queries.some((query) => query.isLoading); const retry = () => { void Promise.all(queries.map((query) => query.refetch())) }
+  return <div className="page-content"><PageHeader title="Panel principal" description={`Resumen operativo del ${new Date().toLocaleDateString('es-MX')}.`} />{hasError && <QueryError className="mb-5" title="Algunos indicadores no están disponibles" message="Revisa que los módulos correspondientes tengan API habilitada." onRetry={retry} />}<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Citas de hoy" value={isLoading ? '...' : total(appointments.data)} icon={CalendarCheck} variant="primary" /><StatCard label="Pacientes" value={isLoading ? '...' : total(patients.data)} icon={Users} variant="success" /><StatCard label="Profesionales" value={isLoading ? '...' : total(professionals.data)} icon={Activity} variant="secondary" /><StatCard label="Órdenes" value={isLoading ? '...' : total(orders.data)} icon={CircleDollarSign} variant="warning" /></div><div className="mt-6 grid gap-5 xl:grid-cols-2"><Card className="p-6"><h2 className="text-lg font-semibold text-ink">Operación diaria</h2><p className="mt-2 text-sm text-ink-muted">Consulta la agenda, disponibilidad y actividad desde el menú lateral.</p><Button className="mt-5" variant="outline" onClick={() => navigate('/dashboard/appointments')}>Ver agenda</Button></Card><Card className="p-6"><h2 className="text-lg font-semibold text-ink">Indicadores</h2><p className="mt-2 text-sm text-ink-muted">Los totales respetan la sucursal activa y los permisos del usuario.</p><Button className="mt-5" variant="outline" onClick={() => navigate('/dashboard/activity')}>Ver actividad</Button></Card></div></div>
 }

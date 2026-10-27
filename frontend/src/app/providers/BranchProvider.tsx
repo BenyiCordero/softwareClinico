@@ -42,7 +42,7 @@ export function BranchProvider({ children }: PropsWithChildren) {
     },
     can: (permission, mode = 'all') => {
       if (!permission) return true
-      if (permissionsQuery.isLoading) return true
+      if (permissionsQuery.isPending) return false
 
       const required = Array.isArray(permission) ? permission : [permission]
       return mode === 'any'

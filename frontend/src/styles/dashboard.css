@@ -198,6 +198,20 @@
   border-left: 3px solid transparent;
   transition: all 0.15s ease;
   cursor: pointer;
+  width: 100%;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+.branch-selector-searchable {
+  width: 190px;
+}
+.branch-selector-searchable > div {
+  height: 36px;
+  border-radius: 8px;
 }
 .sidebar-item:hover {
   background: var(--sidebar-hover);
@@ -324,7 +338,19 @@
     display: none;
   }
   .branch-selector-label {
-    display: none;
+    display: block;
+    min-width: 0;
+    flex: 1 1 auto;
+    max-width: 130px;
+  }
+  .branch-selector {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    font-size: 0.7rem;
+  }
+  .branch-selector-searchable {
+    width: 130px;
   }
   #main-content {
     padding: 1rem;

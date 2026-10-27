@@ -15,7 +15,7 @@ interface RetryableRequestConfig extends AxiosRequestConfig {
 }
 
 const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: appEnv.apiUrl,
   withCredentials: true,
   timeout: 15_000,
   headers: {

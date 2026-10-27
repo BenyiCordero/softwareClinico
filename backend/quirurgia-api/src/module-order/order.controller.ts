@@ -10,11 +10,13 @@ import {
   Req,
   HttpCode,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
 import { OrderService } from './order.service';
 import {
   CreateOrderDetailDto,
@@ -26,8 +28,10 @@ import {
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class OrderController {
   constructor(private service: OrderService) {}
-  @Get() @RequirePermissions('orders.read') findAll() {
-    return this.service.findAll();
+  @Get() @RequirePermissions('orders.read') findAll(
+    @Query() query: OffsetPaginationQueryDto,
+  ) {
+    return this.service.findAll(query);
   }
   @Get(':id') @RequirePermissions('orders.read') findOne(
     @Param('id', ParseIntPipe) id: number,

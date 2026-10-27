@@ -8,11 +8,13 @@ import {
   Post,
   Req,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorator/require-permissions.decorator';
+import { OffsetPaginationQueryDto } from '../common/pagination/dto/offset-pagination-query.dto';
 import { ClinicalRecordService } from './clinical-record.service';
 import {
   CreateClinicalDocumentDto,
@@ -26,8 +28,10 @@ import {
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ClinicalRecordController {
   constructor(private service: ClinicalRecordService) {}
-  @Get() @RequirePermissions('clinical-records.read') findAll() {
-    return this.service.findAll();
+  @Get() @RequirePermissions('clinical-records.read') findAll(
+    @Query() query: OffsetPaginationQueryDto,
+  ) {
+    return this.service.findAll(query);
   }
   @Get(':id') @RequirePermissions('clinical-records.read') findOne(
     @Param('id', ParseIntPipe) id: number,
